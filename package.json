@@ -1,0 +1,23 @@
+{
+  "name": "greenergrass",
+  "version": "1.0.0",
+  "description": "Using music as a means of making the difficult conversations easier with a sound installation. Hosted on a server that is responsible for the transmission of MIDI data to a Max Patch, which plays the sounds, while data is received through activity from 1-2 clients.",
+  "main": "webSockets.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nichothenacho64/GreenerGrass.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nichothenacho64/GreenerGrass/issues"
+  },
+  "homepage": "https://github.com/nichothenacho64/GreenerGrass#readme",
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}
