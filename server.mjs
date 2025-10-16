@@ -1,34 +1,29 @@
-import { WebSocketServer } from 'ws';
-const port = 8080;
-const wss = new WebSocketServer({ port });
+const role = window.location.search.includes('host') ? 'host' : 'client';
+const status = document.getElementById('status');
+const btn = document.getElementById('btn');
+const numberDisplay = document.getElementById('number');
 
-console.log(`WebSocket server listening on ws://localhost:${port}`);
+const ws = new WebSocket(`ws://${window.location.hostname}:8080`);
 
-wss.on('connection', (ws, req) => {
-    console.log('Client connected');
+ws.onopen = () => {
+    status.textContent = 'Connected ✅';
+    ws.send(JSON.stringify({ type: 'register', role }));
+};
 
-     ws.on('message', (message) => {
-        try {
-            const data = JSON.parse(message);
-            if (data.type === 'getRandom') {
-                const value = Math.random();
-                ws.send(JSON.stringify({ type: 'random', value }));
-            }
-        } catch (err) {
-            console.error('Invalid message from client:', message);
-        }
-    });
+ws.onmessage = e => {
+    const data = JSON.parse(e.data);
+    if (role === 'host' && data.type === 'random') {
+        numberDisplay.textContent = `Client ${data.clientId}: ${data.value.toFixed(5)}`;
+    }
+    if (role === 'client') {
+        if (data.type === 'sent') status.textContent = `Number sent ✅ (${data.value.toFixed(5)})`;
+        if (data.type === 'error') status.textContent = `Error: ${data.message}`;
+    }
+};
 
-    ws.on('close', () => console.log('Client disconnected'));
+ws.onclose = () => { status.textContent = 'Disconnected ❌ – retrying...'; setTimeout(() => location.reload(), 2000); };
+
+btn.addEventListener('click', () => {
+    if (role === 'client' && ws.readyState === 1) ws.send(JSON.stringify({ type: 'getRandom' }));
+    if (role === 'host') status.textContent = 'Host cannot generate numbers';
 });
-
-/* 
-connection process:
-1. run a Python server on 8000 at python3 -m http.server 8000 (potentially make this a spawn later on)
-2. run node server.mjs on a SEPARATE terminal window
-3. Computer: http://localhost:8000/index.html
-4. iPad: http://192.168.0.25:8000/
-
-! changes: change Python server to 3000; make this a child process
-! Check correspondence between the client and the server ! ! ! 
-*/
