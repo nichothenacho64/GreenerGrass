@@ -1,29 +1,52 @@
-const role = window.location.search.includes('host') ? 'host' : 'client';
-const status = document.getElementById('status');
-const btn = document.getElementById('btn');
-const numberDisplay = document.getElementById('number');
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const ws = new WebSocket(`ws://${window.location.hostname}:8080`);
+const PORT = 3000;
+const __filename = fileURLToPath(import.meta.url)
+const baseDirectory = path.dirname(__filename)
 
-ws.onopen = () => {
-    status.textContent = 'Connected ✅';
-    ws.send(JSON.stringify({ type: 'register', role }));
-};
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server); // the server manager for all sockets
 
-ws.onmessage = e => {
-    const data = JSON.parse(e.data);
-    if (role === 'host' && data.type === 'random') {
-        numberDisplay.textContent = `Client ${data.clientId}: ${data.value.toFixed(5)}`;
-    }
-    if (role === 'client') {
-        if (data.type === 'sent') status.textContent = `Number sent ✅ (${data.value.toFixed(5)})`;
-        if (data.type === 'error') status.textContent = `Error: ${data.message}`;
-    }
-};
+function setupRoutes(app, baseDirectory) { // static routes for client files
+    app.get("/", (_, response) => response.sendFile(path.join(baseDirectory, "index.html")));
+    app.get("/script.js", (_, response) => response.sendFile(path.join(baseDirectory, "script.js")));
+}
 
-ws.onclose = () => { status.textContent = 'Disconnected ❌ – retrying...'; setTimeout(() => location.reload(), 2000); };
+function setupSocketEvents(io) { // event handling
+    io.on("connection", (socket) => {
+        console.log(`[SOCKET.IO] User connected: ${socket.id}`);
 
-btn.addEventListener('click', () => {
-    if (role === 'client' && ws.readyState === 1) ws.send(JSON.stringify({ type: 'getRandom' }));
-    if (role === 'host') status.textContent = 'Host cannot generate numbers';
-});
+        socket.on("chat message", (data) => {
+            console.log(`[CLIENT] ${data.user}: ${data.text}`);
+            io.emit("chat message", {
+                user: data.user,
+                text: data.text,
+                time: new Date().toLocaleTimeString(),
+            });
+        });
+
+        socket.on("disconnect", () => {
+            console.log(`[SOCKET.IO] User disconnected: ${socket.id}`);
+        });
+    });
+}
+
+function startServer(server, port) {
+    server.listen(port, () => {
+        console.log(`[SERVER] Chat running at http://localhost:${port}`);
+    });
+}
+
+
+function main() {
+    setupRoutes(app, baseDirectory);
+    setupSocketEvents(io);
+    startServer(server, PORT);
+}
+
+main();
