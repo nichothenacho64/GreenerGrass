@@ -1,0 +1,42 @@
+/* for index.html */
+@use "emotion-wheel";
+
+html, body {
+    overflow: hidden;
+    -webkit-overflow-scrolling: auto; /* for iOS */
+    overscroll-behavior: none; /* prevents scroll chaining */
+}
+
+body {
+    font-family: sans-serif;
+    margin: 2rem;
+}
+
+#messages {
+    border: 1px solid #ccc;
+    height: 250px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+input {
+    padding: 6px;
+}
+
+button {
+    padding: 6px 10px;
+}
+
+.message {
+    margin-bottom: 5px;
+}
+
+.timestamp {
+    color: #999;
+    font-size: 0.8em;
+    margin-left: 8px;
+}
+
+.user {
+    font-weight: bold;
+}

@@ -159,3 +159,8 @@ resources/.arch-internal-preview.css
 assets/audio_files
 assets/drones
 assets/a_drone.wav
+
+# Ignore compiled CSS and maps
+css/
+*.css
+*.css.map

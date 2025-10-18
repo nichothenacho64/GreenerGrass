@@ -1,4 +1,4 @@
-const socket = io(); // client function to connect to the server
+const socket = io();
 
 const messages = document.getElementById("messages");
 const username = document.getElementById("username");

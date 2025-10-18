@@ -10,7 +10,7 @@ const baseDirectory = path.dirname(__filename)
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server); // the server manager for all sockets
+const io = new Server(server); // the server manager for all
 
 function setupRoutes(app, baseDirectory) { // static routes for client files
     app.get("/", (_, response) => response.sendFile(path.join(baseDirectory, "index.html")));
@@ -50,3 +50,10 @@ function main() {
 }
 
 main();
+
+/* 
+next:
+1. Check roles clearly – establish who is the 'admin' (i.e. the localhost person)
+2. The 'admin' can assign roles to each person (if necessary), or maybe the user chooses them
+3. MIDI data should be sent to the Max patch
+*/

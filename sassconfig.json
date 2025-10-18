@@ -1,0 +1,10 @@
+{
+    "outDir": "css",
+    "removeComments": true,
+    "sourceMaps": true,
+    "indentType": "space",
+    "indentWidth": 2,
+    "linefeed": "lf",
+    "omitSourceMapUrl": false,
+    "outputStyle": "expanded"
+}
