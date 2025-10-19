@@ -1,15 +1,13 @@
 /* for index.html */
-@use "emotion-wheel";
 
 html, body {
     overflow: hidden;
-    -webkit-overflow-scrolling: auto; /* for iOS */
-    overscroll-behavior: none; /* prevents scroll chaining */
+    overscroll-behavior: none; 
 }
 
 body {
     font-family: sans-serif;
-    margin: 2rem;
+    margin: 2rem; // bring back?
 }
 
 #messages {

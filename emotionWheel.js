@@ -1,12 +1,55 @@
 const mainCircle = document.getElementById('mainCircle');
 const coordsDisplay = document.getElementById('coords');
+const scene = document.getElementById('scene');
+
+const evenLabelX = '-2.5%';
+const evenLabelY = '10%';
+const middleLabelX = '50%';
+const middleLabelY = '-8%';
+const sideLabelX = '-15%';
+const sideLabelY = '50%';
+
+const labels = [
+    "Anger", 
+    "Conflict",
+    "Dislike",
+    "Guilt",
+    "Sadness",
+    "Loneliness",
+    "Fear",
+    "Shame",
+];
+
+const labelPositions = [
+    { top: middleLabelY, left: middleLabelX, transform: 'translateX(-50%)' },
+    { top: evenLabelY, right: evenLabelX },
+    { top: sideLabelY, right: sideLabelX, transform: 'translateY(-50%)' },
+    { bottom: evenLabelY, right: evenLabelX },
+    { bottom: middleLabelY, left: middleLabelX, transform: 'translateX(-50%)' },
+    { bottom: evenLabelY, left: evenLabelX },
+    { top: sideLabelY, left: sideLabelX, transform: 'translateY(-50%)' },
+    { top: evenLabelY, left: evenLabelX }
+];
 
 function createDot(x, y) {
     const dot = document.createElement('div');
-    dot.classList.add('small-circle');
+    dot.classList.add('user-selection');
     dot.style.left = `${x}px`;
     dot.style.top = `${y}px`;
     mainCircle.appendChild(dot);
+}
+
+function drawLabels() {
+    labels.forEach((text, labelPosition) => {
+        const label = document.createElement('div');
+        label.classList.add('label');
+        label.textContent = text;
+        Object.assign(label.style, labelPositions[labelPosition]);
+        scene.appendChild(label);
+        requestAnimationFrame(() => {
+            label.style.opacity = '1';
+        });
+    });
 }
 
 mainCircle.addEventListener('click', (event) => {
@@ -23,3 +66,5 @@ mainCircle.addEventListener('click', (event) => {
     coordsDisplay.textContent = `x: ${normX.toFixed(2)}, y: ${normY.toFixed(2)}`;
     createDot(x, y);
 });
+
+drawLabels();
