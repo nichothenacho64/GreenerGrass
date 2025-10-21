@@ -104,10 +104,20 @@ body {
     }
 }
 
-#coords { // ! THIS IS TEMPORARY & HIDDEN IN THE FINAL THING!
-    position: fixed;
+// ! THIS IS TEMPORARY & HIDDEN IN THE FINAL THING!
+
+#coords {
     top: 1.5rem;
     right: 1.5rem;
+}
+
+#feedback {
+    top: 1.5rem;
+    left: 1.5rem;
+}
+
+.feedback-label { 
+    position: fixed;
     font-weight: bold;
     color: #333;
     font-size: 1rem;
@@ -117,7 +127,7 @@ body {
     z-index: 10;
 }
 
-.label {
+.emotion-label {
     position: absolute;
     color: black;
     font-weight: bold;
