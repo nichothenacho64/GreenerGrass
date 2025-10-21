@@ -32,11 +32,20 @@ const labelPositions = [
 ];
 
 function createDot(x, y) {
+    const existingDot = mainCircle.querySelector('.user-selection');
+    if (existingDot) {
+        existingDot.remove();
+    }
+
     const dot = document.createElement('div');
     dot.classList.add('user-selection');
     dot.style.left = `${x}px`;
     dot.style.top = `${y}px`;
     mainCircle.appendChild(dot);
+
+    requestAnimationFrame(() => {
+        dot.classList.add('visible');
+    });
 }
 
 function drawLabels() {
