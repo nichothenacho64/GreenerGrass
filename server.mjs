@@ -12,29 +12,66 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server); // the server manager for all
 
-function setupRoutes(app, baseDirectory) { // static routes for client files
-    app.get("/", (_, response) => response.sendFile(path.join(baseDirectory, "index.html")));
-    app.get("/script.js", (_, response) => response.sendFile(path.join(baseDirectory, "script.js")));
-}
+function setupSocketEvents(io) {
+    const state = {
+        clients: new Map(), // socket.id -> { isLocal: boolean, isReady: boolean }
+    };
 
-function setupSocketEvents(io) { // event handling
     io.on("connection", (socket) => {
+        state.clients.set(socket.id, { isLocal: false, isReady: false }); // assume non local
+
         console.log(`[SOCKET.IO] User connected: ${socket.id}`);
 
-        socket.on("chat message", (data) => {
-            console.log(`[CLIENT] ${data.user}: ${data.text}`);
-            io.emit("chat message", {
-                user: data.user,
-                text: data.text,
-                time: new Date().toLocaleTimeString(),
-            });
+        socket.on("clientIdentity", ({ isLocal }) => {
+            const client = state.clients.get(socket.id);
+            if (client) {
+                client.isLocal = isLocal
+            };
+            updateReadyStatus(io, state);
         });
 
+        handleChatEvents(io, socket);
+        handleReadyEvents(io, socket, state);
+
         socket.on("disconnect", () => {
+            state.clients.delete(socket.id);
+            updateReadyStatus(io, state);
             console.log(`[SOCKET.IO] User disconnected: ${socket.id}`);
         });
     });
 }
+
+
+function handleChatEvents(io, socket) {
+    socket.on("chat message", (data) => {
+        console.log(`[CLIENT] ${data.user}: ${data.text}`);
+
+        io.emit("chat message", {
+            user: data.user,
+            text: data.text,
+            time: new Date().toLocaleTimeString(),
+        });
+    });
+}
+
+function handleReadyEvents(io, socket, state) {
+    socket.on("clientReady", () => {
+        const client = state.clients.get(socket.id);
+        if (!client) return;
+        client.isReady = true;
+        updateReadyStatus(io, state);
+    });
+}
+
+
+function updateReadyStatus(io, state) {
+    const nonLocalClients = [...state.clients.values()].filter(c => !c.isLocal);
+    const totalClients = nonLocalClients.length;
+    const readyCount = nonLocalClients.filter(c => c.isReady).length;
+
+    io.emit("updateReadyStatus", { readyCount, totalClients });
+}
+
 
 function startServer(server, port) {
     server.listen(port, () => {
@@ -42,14 +79,10 @@ function startServer(server, port) {
     });
 }
 
+app.use(express.static(baseDirectory));
+setupSocketEvents(io);
+startServer(server, PORT);
 
-function main() {
-    setupRoutes(app, baseDirectory);
-    setupSocketEvents(io);
-    startServer(server, PORT);
-}
-
-main();
 
 /* 
 next:
