@@ -19,6 +19,7 @@
 	},
 	"homepage": "https://github.com/nichothenacho64/GreenerGrass#readme",
 	"dependencies": {
+		"easymidi": "^3.1.0",
 		"express": "^4.21.2",
 		"socket.io": "^4.8.1"
 	}

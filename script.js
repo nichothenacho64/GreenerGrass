@@ -1,6 +1,10 @@
+import { mainCircleInteraction } from "./emotionWheel.js";
+
 const socket = io();
 
 const isLocal = window.location.hostname === "localhost";
+const path = window.location.pathname;
+const pageName = path.substring(path.lastIndexOf('/') + 1);
 
 socket.on("connect", () => { // whether the client is local or not
     socket.emit("clientIdentity", { isLocal });
@@ -77,4 +81,10 @@ function displayMessage({ user, text, time }) {
     messages.scrollTop = messages.scrollHeight;
 }
 
-initaliseChat();
+if (pageName === "index.html") {
+    initaliseChat();
+} else if (pageName === "emotion-wheel.html") {
+    mainCircleInteraction(socket);
+} else {
+    console.log("This is a problem...")
+}

@@ -3,6 +3,7 @@ import http from "http";
 import { Server } from "socket.io";
 import path from "path";
 import { fileURLToPath } from "url";
+import easymidi from "easymidi";
 
 const PORT = 3000;
 const __filename = fileURLToPath(import.meta.url)
@@ -65,11 +66,27 @@ function handleReadyEvents(io, socket, state) {
 
 
 function updateReadyStatus(io, state) {
-    const nonLocalClients = [...state.clients.values()].filter(c => !c.isLocal);
+    const nonLocalClients = [...state.clients.values()].filter(client => !client.isLocal);
     const totalClients = nonLocalClients.length;
-    const readyCount = nonLocalClients.filter(c => c.isReady).length;
+    const readyCount = nonLocalClients.filter(client => client.isReady).length;
 
     io.emit("updateReadyStatus", { readyCount, totalClients });
+}
+
+function setupMIDIProcessing(io) {
+    const MIDIOutput = new easymidi.Output("Web MIDI Bridge", true);
+    console.log("[MIDI] Output initialised:", MIDIOutput.name);
+
+    io.on("connection", (socket) => { // listening for midi data
+        socket.on("sendMIDIData", (data) => {
+            MIDIOutput.send("cc", { controller: 10, value: data.perspectiveScore, channel: 10 }); // ! the channels may need to differ
+            MIDIOutput.send("cc", { controller: 10, value: data.arousalScore, channel: 11 }); 
+            MIDIOutput.send("cc", { controller: data.label1.index, value: data.label1.proximity, channel: data.label1.index - 1}); 
+            MIDIOutput.send("cc", { controller: data.label2.index, value: data.label2.proximity, channel: data.label2.index - 1 });
+
+            console.log(`[MIDI] Received values: Index: ${data.label1.index}, Value: ${data.label1.proximity}`);
+        });
+    });
 }
 
 
@@ -81,6 +98,7 @@ function startServer(server, port) {
 
 app.use(express.static(baseDirectory));
 setupSocketEvents(io);
+setupMIDIProcessing(io);
 startServer(server, PORT);
 
 
