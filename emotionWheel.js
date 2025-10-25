@@ -114,39 +114,50 @@ function floatToMidi(value) {
     return scaled;
 }
 
-export function mainCircleInteraction(socket) {
-    mainCircle.addEventListener('click', (event) => {
-        const boundingRect = mainCircle.getBoundingClientRect(); // the main circle's position RELATIVE to the viewport
-        const centerX = boundingRect.width / 2;
-        const centerY = boundingRect.height / 2;
+function handleCircleClick(event, socket) { // things that happen when the circle gets clicked
+    const { clickX, clickY, normalisedX, normalisedY } = getClickCoordinates(event);
 
-        const clickX = event.clientX - boundingRect.left; // the click position relative to the circle
-        const clickY = event.clientY - boundingRect.top; // ! check compatibility with iOS!
+    coordsDisplay.textContent = `Perspective score: ${normalisedX.toFixed(2)}, Arousal score: ${normalisedY.toFixed(2)}`;
+    showUserSelection(clickX, clickY);
 
-        const normalisedX = ((clickX - centerX) / centerX) * scaleRange; // converting to my coordinate system
-        const normalisedY = -((clickY - centerY) / centerY) * scaleRange; // invert Y so that the top is +2
+    const topProximities = findTopLabelProximities(normalisedX, normalisedY);
+    showFeedback(topProximities);
 
-        coordsDisplay.textContent = `Perspective score: ${normalisedX.toFixed(2)}, Arousal score: ${normalisedY.toFixed(2)}`;
-        showUserSelection(clickX, clickY);
+    // eventually, I will have to deal with the case that there is only 1 emotion
+    emitMIDIData(socket, normalisedX, normalisedY, topProximities);
+}
 
-        const topProximities = findTopLabelProximities(normalisedX, normalisedY);
-        showFeedback(topProximities);
+function getClickCoordinates(event) {
+    const boundingRect = mainCircle.getBoundingClientRect(); // the main circle's position RELATIVE to the viewport
+    const centerX = boundingRect.width / 2;
+    const centerY = boundingRect.height / 2;
 
+    const clickX = event.clientX - boundingRect.left; // the click position relative to the circle
+    const clickY = event.clientY - boundingRect.top;  // ! check compatibility with iOS!
 
-        // ! eventually, I will have to deal with the case that there is only 1 emotion
-        socket.emit("sendMIDIData", {
-            arousalScore: floatToMidi(normalisedY.toFixed(2)),
-            perspectiveScore: floatToMidi(normalisedX.toFixed(2)),
-            label1: {
-                index: topProximities[0].index,
-                proximity: topProximities[0].proximity
-            },
-            label2: {
-                index: topProximities[1].index,
-                proximity: topProximities[1].proximity
-            }
-        });
+    const normalisedX = ((clickX - centerX) / centerX) * scaleRange; // normalising the click coordinates
+    const normalisedY = -((clickY - centerY) / centerY) * scaleRange; 
+
+    return { clickX, clickY, normalisedX, normalisedY };
+}
+
+function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
+    socket.emit("sendMIDIData", {
+        arousalScore: floatToMidi(normalisedY.toFixed(2)),
+        perspectiveScore: floatToMidi(normalisedX.toFixed(2)),
+        label1: {
+            index: topProximities[0].index,
+            proximity: topProximities[0].proximity
+        },
+        label2: {
+            index: topProximities[1].index,
+            proximity: topProximities[1].proximity
+        }
     });
+}
+
+export function mainCircleInteraction(socket) { // this is the export
+    mainCircle.addEventListener('click', (event) => handleCircleClick(event, socket));
 }
 
 drawLabels();
