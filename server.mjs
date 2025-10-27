@@ -15,7 +15,7 @@ const io = new Server(server); // the server manager for all
 
 function setupSocketEvents(io) {
     const state = {
-        clients: new Map(), // socket.id -> { isLocal: boolean, isReady: boolean }
+        clients: new Map(), 
     };
 
     io.on("connection", (socket) => {
@@ -81,14 +81,14 @@ function setupMIDIProcessing(io) {
         socket.on("sendMIDIData", (data) => {
             MIDIOutput.send("cc", { controller: 10, value: data.perspectiveScore, channel: 10 }); // ! the channels may need to differ
             MIDIOutput.send("cc", { controller: 10, value: data.arousalScore, channel: 11 }); 
-            MIDIOutput.send("cc", { controller: data.label1.index, value: data.label1.proximity, channel: data.label1.index - 1}); 
-            MIDIOutput.send("cc", { controller: data.label2.index, value: data.label2.proximity, channel: data.label2.index - 1 });
+            MIDIOutput.send("cc", { controller: 1, value: data.label1.proximity, channel: data.label1.index - 1 }); 
+            MIDIOutput.send("cc", { controller: 2, value: data.label2.proximity, channel: data.label2.index - 1 });
 
-            console.log(`[MIDI] Received values: Index: ${data.label1.index}, Value: ${data.label1.proximity}`);
+            console.log(`[MIDI] Received value 1: Index: ${data.label1.index}, Value: ${data.label1.proximity}`);
+            console.log(`[MIDI] Received value 2: Index: ${data.label2.index}, Value: ${data.label2.proximity}`);
         });
     });
 }
-
 
 function startServer(server, port) {
     server.listen(port, () => {
@@ -101,10 +101,8 @@ setupSocketEvents(io);
 setupMIDIProcessing(io);
 startServer(server, PORT);
 
-
 /* 
-next:
-1. Check roles clearly – establish who is the 'admin' (i.e. the localhost person)
-2. The 'admin' can assign roles to each person (if necessary), or maybe the user chooses them
-3. MIDI data should be sent to the Max patch
+NOTE:
+The 'admin' should be immediately directed to the admin page
+All other clients should start on the user page
 */
