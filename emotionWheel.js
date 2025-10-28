@@ -160,4 +160,7 @@ export function mainCircleInteraction(socket) { // this is the export
     mainCircle.addEventListener('click', (event) => handleCircleClick(event, socket));
 }
 
-drawLabels();
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Labels drawn");
+    drawLabels();
+});

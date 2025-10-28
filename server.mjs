@@ -42,7 +42,6 @@ function setupSocketEvents(io) {
     });
 }
 
-
 function handleChatEvents(io, socket) {
     socket.on("chat message", (data) => {
         console.log(`[CLIENT] ${data.user}: ${data.text}`);
@@ -64,13 +63,17 @@ function handleReadyEvents(io, socket, state) {
     });
 }
 
-
 function updateReadyStatus(io, state) {
     const nonLocalClients = [...state.clients.values()].filter(client => !client.isLocal);
     const totalClients = nonLocalClients.length;
     const readyCount = nonLocalClients.filter(client => client.isReady).length;
 
     io.emit("updateReadyStatus", { readyCount, totalClients });
+    
+    if (totalClients > 0 && readyCount === totalClients) { 
+        console.log("[SERVER] All clients are ready!"); // debugging
+        io.emit("allReady"); // change page
+    }
 }
 
 function setupMIDIProcessing(io) {
