@@ -1,50 +1,42 @@
-const socket = io();
-
 const isLocal = window.location.hostname === "localhost";
 const path = window.location.pathname;
 const pageName = path === "/" ? "index.html" : path.substring(path.lastIndexOf("/") + 1);
 
-const messages = document.getElementById("messages");
-const username = document.getElementById("username");
-const messageInput = document.getElementById("messageInput");
-const sendButton = document.getElementById("sendButton");
-
 const readyButton = document.getElementById("readyButton");
 const readyStatus = document.getElementById("readyStatus");
-
 const pageChangeTime = 2000;
 
+let socket; // declaring but not connecting the socket
 let isReady = false;
+let adminSet = false;
 
-function initaliseChat() {
-    registerEventListeners();
-    registerSocketHandlers();
-    registerReadyHandlers();
+if (isLocal && pageName !== "admin.html") {
+    window.location.replace("/admin.html");
+} else {
+    socket = io();
+    setupPage(socket);
 }
 
-function emitClientIdentity() {
-    socket.on("connect", () => {
-        console.log("Connected to server. Emitting identity...");
-        socket.emit("clientIdentity", { isLocal });
-    });
+function setupPage(socket) {
+    if (pageName === "index.html") {
+        socket.on("connect", () => {
+            socket.emit("clientIdentity", { isLocal });
+        });
+        socket.on("reconnect", () => {
+            console.log("Reconnected. Re-emitting identity...");
+            socket.emit("clientIdentity", { isLocal });
+        });
 
-    socket.on("reconnect", () => {
-        console.log("Reconnected. Re-emitting identity...");
-        socket.emit("clientIdentity", { isLocal });
-    });
-}
-
-function registerEventListeners() {
-    sendButton.addEventListener("click", handleSendMessage);
-    messageInput.addEventListener("keypress", (event) => {
-        if (event.key === "Enter") {
-            handleSendMessage()
-        };
-    });
-}
-
-function registerSocketHandlers() {
-    socket.on("chat message", (data) => displayMessage(data));
+        registerReadyHandlers(socket);
+    } else if (pageName === "emotion-wheel.html") {
+        import("./emotionWheel.js").then(({ mainCircleInteraction }) => {
+            mainCircleInteraction(socket);
+        });
+    } else if (pageName === "admin.html") {
+        console.log("Admin page loaded");
+    } else {
+        console.log("Unexpected page:", pageName);
+    }
 }
 
 function registerReadyHandlers() {
@@ -66,42 +58,12 @@ function registerReadyHandlers() {
     });
 
     socket.on("allReady", () => {
-        readyButton.textContent = "READY";
+        readyButton.textContent = "Redirecting to next page...";
         console.log("All ready! Redirecting...");
         setTimeout(() => {
-            window.location.href = "/emotion-wheel.html";
+            if (!isLocal) {
+                window.location.href = "/emotion-wheel.html";
+            }
         }, pageChangeTime);
     });
-}
-
-function handleSendMessage() {
-    const text = messageInput.value.trim();
-    const user = username.value.trim() || "Anonymous";
-    if (!text) return;
-
-    socket.emit("chat message", { user, text });
-    messageInput.value = "";
-}
-
-function displayMessage({ user, text, time }) {
-    const messageElement = document.createElement("div");
-    messageElement.className = "message";
-    messageElement.innerHTML = `
-    <span class="user">${user}:</span> ${text}
-    <span class="timestamp">${time}</span>
-  `;
-    messages.appendChild(messageElement);
-    messages.scrollTop = messages.scrollHeight;
-}
-
-emitClientIdentity()
-if (pageName === "index.html") {
-    initaliseChat();
-} else if (pageName === "emotion-wheel.html") {
-    import("./emotionWheel.js").then(({ mainCircleInteraction }) => {
-        console.log("Circle interaction!");
-        mainCircleInteraction(socket);
-    });
-} else {
-    console.log("This is a problem...");
 }
