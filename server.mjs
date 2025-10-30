@@ -83,6 +83,13 @@ function setupMIDIProcessing(io) {
             console.log(`[MIDI] Received value 1: Index: ${data.label1.index}, Value: ${data.label1.proximity}`);
             console.log(`[MIDI] Received value 2: Index: ${data.label2.index}, Value: ${data.label2.proximity}`);
         });
+
+        socket.on("resetMIDI", () => {
+            console.log("[MIDI] Resetting all channels");
+            for (let channel = 0; channel <= 15; channel++) {
+                MIDIOutput.send("cc", { controller: 0, value: 0, channel });
+            }
+        });
     });
 }
 

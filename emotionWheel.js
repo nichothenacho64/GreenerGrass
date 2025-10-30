@@ -2,6 +2,7 @@ const mainCircle = document.getElementById('mainCircle');
 const coordsDisplay = document.getElementById('coords');
 const scene = document.getElementById('scene');
 const feedback = document.getElementById('feedback');
+const resetButton = document.getElementById('resetButton');
 
 const evenLabelX = '-2.5%';
 const evenLabelY = '10%';
@@ -136,7 +137,7 @@ function getClickCoordinates(event) {
     const clickY = event.clientY - boundingRect.top;  // ! check compatibility with iOS!
 
     const normalisedX = ((clickX - centerX) / centerX) * scaleRange; // normalising the click coordinates
-    const normalisedY = -((clickY - centerY) / centerY) * scaleRange; 
+    const normalisedY = -((clickY - centerY) / centerY) * scaleRange;
 
     return { clickX, clickY, normalisedX, normalisedY };
 }
@@ -158,6 +159,12 @@ function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
 
 export function mainCircleInteraction(socket) { // this is the export
     mainCircle.addEventListener('click', (event) => handleCircleClick(event, socket));
+    if (resetButton) { 
+    resetButton.addEventListener("click", () => { 
+        socket.emit("resetMIDI"); 
+        console.log("[CLIENT] Requested MIDI reset"); 
+    }); 
+}
 }
 
 document.addEventListener("DOMContentLoaded", () => {
