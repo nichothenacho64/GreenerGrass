@@ -4,11 +4,11 @@ const scene = document.getElementById('scene');
 const feedback = document.getElementById('feedback');
 const resetButton = document.getElementById('resetButton');
 
-const evenLabelX = '-2.5%';
+const evenLabelX = '-5.5%'; // 2.5
 const evenLabelY = '10%';
 const middleLabelX = '50%';
 const middleLabelY = '-8%';
-const sideLabelX = '-15%';
+const sideLabelX = '-20%';
 const sideLabelY = '50%';
 
 const oneLabelThreshold = 0.97;
@@ -31,7 +31,7 @@ const labelPositions = [
     { top: sideLabelY, right: sideLabelX, transform: 'translateY(-50%)' },
     { bottom: evenLabelY, right: evenLabelX },
     { bottom: middleLabelY, left: middleLabelX, transform: 'translateX(-50%)' },
-    { bottom: evenLabelY, left: evenLabelX },
+    { bottom: evenLabelY, left: evenLabelX }, // big word
     { top: sideLabelY, left: sideLabelX, transform: 'translateY(-50%)' },
     { top: evenLabelY, left: evenLabelX }
 ];

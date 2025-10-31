@@ -1,6 +1,8 @@
 // high arousal score = high saturation
 // high perspective score = high luminance
 
+@import "styles.scss";
+
 $sdf: 60%;
 $ldf: 55%;
 
@@ -19,8 +21,6 @@ $emotion-6: hsl(170, $sdf - $smtp1, $ldf - $lmtp1);
 $emotion-7: hsl(150, $sdf, $ldf - $lmtp2);
 $emotion-8: hsl(130, $sdf + $smtp1, $ldf - $lmtp2);
 
-
-$octagon-colour: #2e2e2e;
 $circle-gradient: conic-gradient(
     $emotion-1 0deg,
     $emotion-2 45deg,
@@ -33,9 +33,8 @@ $circle-gradient: conic-gradient(
     $emotion-1 360deg
 );
 
-$circle-border: #333;
-
-$octagon-size: min(70vmin, 500px); 
+// $octagon-size: min(70vmin, 500px); 
+$octagon-size: 50vmin;
 $circle-size: calc(#{$octagon-size} * 0.85);
 $dot-size: 20px;
 
@@ -60,7 +59,7 @@ body {
     width: $octagon-size;
     height: $octagon-size;
     transform: translate(-50%, -50%);
-    background: $octagon-colour;
+    background: rgba(255, 255, 255, 0.3);
     clip-path: polygon(50% 0%,
             85% 15%, 
             100% 50%,
@@ -80,7 +79,7 @@ body {
     height: $circle-size;
     border-radius: 50%;
     background: $circle-gradient;
-    border: 2px solid $circle-border;
+    // border: 2px solid $circle-border;
     transform: translate(-50%, -50%);
     cursor: crosshair; // for choosing the cursor type; maybe this won't be needed for later
 
@@ -122,21 +121,21 @@ body {
 }
 
 .feedback-label { 
+    color: white;
     position: fixed;
     font-weight: bold;
-    color: #333;
     font-size: 1rem;
-    background: rgba(198, 198, 198, 0.5);
+    background: rgba(255, 255, 255, 0.5);
     padding: 0.3rem 0.6rem;
     border-radius: 7.5px;
     z-index: 10;
 }
 
 .emotion-label {
+    color: white;
     position: absolute;
-    color: black;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 0.65rem !important;
     white-space: nowrap;
     opacity: 0;
     transition: opacity 0.4s ease-in-out; 
