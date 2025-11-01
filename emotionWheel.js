@@ -1,8 +1,8 @@
-const mainCircle = document.getElementById('mainCircle');
-const coordsDisplay = document.getElementById('coords');
-const scene = document.getElementById('scene');
-const feedback = document.getElementById('feedback');
-const resetButton = document.getElementById('resetButton');
+const mainCircle = document.getElementById("mainCircle");
+const coordsDisplay = document.getElementById("coords");
+const scene = document.getElementById("scene");
+const feedback = document.getElementById("feedback");
+const resetButton = document.getElementById("resetButton");
 
 const oneLabelThreshold = 0.97;
 const scaleRange = 2;
@@ -18,22 +18,22 @@ const labels = [
     "Shame",
 ];
 
-const circleCentre = '50%';
-const evenLabelY = '8%';
-const evenLabelX = '40%';  
-const sideLabelX = '55%';  
-const middleLabelX = '50%';
-const middleLabelY = '-8%';
+const circleCentre = "50%";
+const evenLabelY = "8%";
+const evenLabelX = "40%";  
+const sideLabelX = "55%";  
+const middleLabelX = "50%";
+const middleLabelY = "-8%";
 
 const labelPositions = [
-    { top: middleLabelY, left: middleLabelX, transform: 'translateX(-50%)' },
-    { top: evenLabelY, left: `calc(${circleCentre} + ${evenLabelX})`, textAlign: 'left' },
-    { top: circleCentre, left: `calc(${circleCentre} + ${sideLabelX})`, transform: 'translateY(-50%)', textAlign: 'left' }, 
-    { bottom: evenLabelY, left: `calc(${circleCentre} + ${evenLabelX})`, textAlign: 'left' },
-    { bottom: middleLabelY, left: middleLabelX, transform: 'translateX(-50%)' },
-    { bottom: evenLabelY, right: `calc(${circleCentre} + ${evenLabelX})`, textAlign: 'right' },
-    { top: circleCentre, right: `calc(${circleCentre} + ${sideLabelX})`, transform: 'translateY(-50%)', textAlign: 'right' }, 
-    { top: evenLabelY, right: `calc(${circleCentre} + ${evenLabelX})`, textAlign: 'right' }               
+    { top: middleLabelY, left: middleLabelX, transform: "translateX(-50%)" },
+    { top: evenLabelY, left: `calc(${circleCentre} + ${evenLabelX})`, textAlign: "left" },
+    { top: circleCentre, left: `calc(${circleCentre} + ${sideLabelX})`, transform: "translateY(-50%)", textAlign: "left" }, 
+    { bottom: evenLabelY, left: `calc(${circleCentre} + ${evenLabelX})`, textAlign: "left" },
+    { bottom: middleLabelY, left: middleLabelX, transform: "translateX(-50%)" },
+    { bottom: evenLabelY, right: `calc(${circleCentre} + ${evenLabelX})`, textAlign: "right" },
+    { top: circleCentre, right: `calc(${circleCentre} + ${sideLabelX})`, transform: "translateY(-50%)", textAlign: "right" }, 
+    { top: evenLabelY, right: `calc(${circleCentre} + ${evenLabelX})`, textAlign: "right" }               
 ];
 
 
@@ -49,26 +49,26 @@ function generateVertexCoordinates() {
 }
 
 function showUserSelection(x, y) {
-    const existingDot = mainCircle.querySelector('.user-selection');
+    const existingDot = mainCircle.querySelector(".user-selection");
     if (existingDot) {
         existingDot.remove();
     }
 
-    const dot = document.createElement('div');
-    dot.classList.add('user-selection');
+    const dot = document.createElement("div");
+    dot.classList.add("user-selection");
     dot.style.left = `${x}px`;
     dot.style.top = `${y}px`;
     mainCircle.appendChild(dot);
 
     requestAnimationFrame(() => {
-        dot.classList.add('visible');
+        dot.classList.add("visible");
     });
 }
 
 function drawLabels() {
     labels.forEach((text, labelPosition) => {
-        const label = document.createElement('div');
-        label.classList.add('emotion-label');
+        const label = document.createElement("div");
+        label.classList.add("emotion-label");
         label.textContent = text;
 
         Object.assign(label.style, labelPositions[labelPosition]);
@@ -78,7 +78,7 @@ function drawLabels() {
 
         scene.appendChild(label);
         requestAnimationFrame(() => {
-            label.style.opacity = '1';
+            label.style.opacity = "1";
         });
     });
 }
@@ -112,7 +112,7 @@ function findTopLabelProximities(normalisedX, normalisedY) {
 function showFeedback(topProximities) {
     const feedbackText = topProximities
         .map(proximity => `${labels[proximity.index - 1]}: ${proximity.proximity}%`) // the mapping happens here
-        .join(topProximities.length === 1 ? '' : ' and ');
+        .join(topProximities.length === 1 ? "" : " and ");
     feedback.textContent = feedbackText;
 }
 
@@ -165,11 +165,10 @@ function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
 }
 
 export function mainCircleInteraction(socket) { // this is the export
-    mainCircle.addEventListener('click', (event) => handleCircleClick(event, socket));
+    mainCircle.addEventListener("click", (event) => handleCircleClick(event, socket));
     if (resetButton) { 
     resetButton.addEventListener("click", () => { 
         socket.emit("resetMIDI"); 
-        console.log("[CLIENT] Requested MIDI reset"); 
     }); 
 }
 }

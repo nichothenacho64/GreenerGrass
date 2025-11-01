@@ -1,33 +1,47 @@
-const isLocal = window.location.hostname === "localhost";
-const path = window.location.pathname;
-const pageName = path === "/" ? "index.html" : path.substring(path.lastIndexOf("/") + 1);
-
 const readyButton = document.getElementById("readyButton");
 const readyStatus = document.getElementById("readyStatus");
 const pageChangeTime = 2000;
 
-let socket; // declaring but not connecting the socket
-let isReady = false;
-let adminSet = false;
+const isLocal = window.location.hostname === "localhost";
+const path = window.location.pathname;
+const pageName = path === "/" ? "index.html" : path.substring(path.lastIndexOf("/") + 1);
 
-if (isLocal && pageName !== "admin.html") {
-    window.location.replace("pages/admin.html");
-} else {
-    socket = io();
-    setupPage(socket);
+let socket; // reference for now, it may/may not connect
+let isReady = false;
+let windowName; // for identifying the client/admin
+
+function initialiseClientType() {
+    if (!window.name || window.name.trim() === "") {
+        if (pageName === "pages/admin.html" || pageName === "admin.html" || isLocal) {
+            window.name = "admin"; // mark as admin
+        } else {
+            const numUniqueClientIdentifiers = 10000
+            const clientIdentifier = Math.floor(Math.random() * numUniqueClientIdentifiers)
+            window.name = `client-${clientIdentifier}`; // unique client
+        }
+    }
+    windowName = window.name;
 }
 
-function setupPage(socket) {
-    if (pageName === "index.html") {
-        socket.on("connect", () => {
-            socket.emit("clientIdentity", { isLocal });
-        });
-        socket.on("reconnect", () => {
-            console.log("Reconnected. Re-emitting identity...");
-            socket.emit("clientIdentity", { isLocal });
-        });
+function redirectAdmin() {
+    if (isLocal && pageName !== "admin.html") {
+        window.name = "admin"; // for ensuring that the admin's identity is set
+        window.location.replace("pages/admin.html");
+        return true; // true means that a redirect occured
+    }
+    return false;
+}
 
-        registerReadyHandlers(socket);
+function initialiseSocket() {
+    socket = io();
+
+    socket.on("connect", () => socket.emit("clientIdentity", { windowName }));
+    socket.on("reconnect", () => socket.emit("clientIdentity", { windowName }));
+}
+
+function setupPage() {
+    if (pageName === "index.html") {
+        registerReadyHandlers();
     } else if (pageName === "emotion-wheel.html") {
         import("./emotionWheel.js").then(({ mainCircleInteraction }) => {
             mainCircleInteraction(socket);
@@ -35,7 +49,7 @@ function setupPage(socket) {
     } else if (pageName === "admin.html") {
         console.log("Admin page loaded");
     } else {
-        console.log("Unexpected page:", pageName);
+        console.warn("Unexpected page:", pageName);
     }
 }
 
@@ -43,18 +57,20 @@ function registerReadyHandlers() {
     readyButton.addEventListener("click", () => {
         if (isReady) return;
         isReady = true;
-
         socket.emit("clientReady");
         readyButton.disabled = true;
     });
 
-    socket.on("updateReadyStatus", ({ readyCount, totalClients }) => {
+    socket.on("initialState", ({ readyCount, totalClients, adminExists }) => {
         readyStatus.textContent = `${readyCount} / ${totalClients}`;
+        if (adminExists) {
+            console.log("Admin already present!")
+        };
+    });
 
-        if (readyCount === totalClients && totalClients > 0) {
-            readyButton.textContent = "READY";
-            readyButton.disabled = false;
-        }
+    socket.on("updateReadyStatus", ({ readyCount, totalClients }) => { // standard updating
+        readyStatus.textContent = `${readyCount} / ${totalClients}`;
+        console.log("Ready status updated");
     });
 
     socket.on("allReady", () => {
@@ -62,8 +78,18 @@ function registerReadyHandlers() {
         console.log("All ready! Redirecting...");
         setTimeout(() => {
             if (!isLocal) {
-                window.location.href = "pages/emotion-wheel.html";
-            }
+                window.location.href = "pages/emotion-wheel.html"
+            };
         }, pageChangeTime);
     });
 }
+
+initialiseClientType();
+const adminRedirected = redirectAdmin();
+if (!adminRedirected) {
+    console.log("Socket initialised");
+    initialiseSocket();
+    setupPage();
+}
+
+

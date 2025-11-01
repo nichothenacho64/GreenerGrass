@@ -20,20 +20,30 @@ function setupSocketEvents(io) {
 
     io.on("connection", (socket) => {
         state.clients.set(socket.id, { isLocal: false, isReady: false, identified: false });
-
+        
+        const nonLocalClients = [...state.clients.values()].filter(client => client.identified && !client.isLocal);
+        const totalClients = nonLocalClients.length;
+        const readyCount = nonLocalClients.filter(client => client.isReady).length;
+        const adminExists = [...state.clients.values()].some(client => client.identified && client.isLocal);
+        
         console.log(`[SOCKET.IO] User connected: ${socket.id}`);
 
-        socket.on("clientIdentity", ({ isLocal }) => {
-            const client = state.clients.get(socket.id);
-            if (client) {
-                client.isLocal = !!isLocal;
+        socket.emit("initialState", { readyCount, totalClients, adminExists }); // for the new client
 
-                if (client.isLocal) {
-                    console.log(`[ADMIN] Localhost client ${socket.id} ignored from totals`);
-                    updateReadyStatus(io, state); // an additional measure for removal
-                    return;
-                }
+        socket.on("clientIdentity", ({ windowName }) => { 
+            const client = state.clients.get(socket.id);
+            if (!client) return;
+            
+            if (windowName && windowName.toLowerCase().includes("admin")) { 
+                client.isLocal = true; 
+                client.identified = true; 
+                console.log(`[ADMIN] Local (admin) client identified by windowName: ${windowName}`); 
+            } else {
+                client.isLocal = false; 
+                client.identified = true; 
+                console.log(`[CLIENT] Non-local client identified: ${windowName}`);
             }
+
             updateReadyStatus(io, state);
         });
 

@@ -15,9 +15,14 @@ button {
     color: $primary-colour;
     font-family: "Merriweather", 'Times New Roman', Times, serif;
     background-color: white;
+    border: 1px solid white;
     border-radius: 1em;
     padding: 1em 2em;
     font-size: 0.5em;
+
+    &:disabled {
+        background-color: $disabled-white !important;
+    }
 }
 
 .body-text {
