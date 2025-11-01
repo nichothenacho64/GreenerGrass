@@ -1,8 +1,6 @@
+@import "styling/constants";
+
 @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&display=swap');
-
-$primary-colour: #121238;
-
-$corner-margin: 1.5rem;
 
 html, body {
     overflow: hidden;
@@ -19,6 +17,10 @@ button {
     background-color: white;
     border-radius: 1em;
     padding: 1em 2em;
+    font-size: 0.5em;
+}
+
+.body-text {
     font-size: 0.5em;
 }
 

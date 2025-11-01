@@ -4,13 +4,6 @@ const scene = document.getElementById('scene');
 const feedback = document.getElementById('feedback');
 const resetButton = document.getElementById('resetButton');
 
-const evenLabelX = '-5.5%'; // 2.5
-const evenLabelY = '10%';
-const middleLabelX = '50%';
-const middleLabelY = '-8%';
-const sideLabelX = '-20%';
-const sideLabelY = '50%';
-
 const oneLabelThreshold = 0.97;
 const scaleRange = 2;
 
@@ -25,16 +18,24 @@ const labels = [
     "Shame",
 ];
 
+const circleCentre = '50%';
+const evenLabelY = '8%';
+const evenLabelX = '40%';  
+const sideLabelX = '55%';  
+const middleLabelX = '50%';
+const middleLabelY = '-8%';
+
 const labelPositions = [
     { top: middleLabelY, left: middleLabelX, transform: 'translateX(-50%)' },
-    { top: evenLabelY, right: evenLabelX },
-    { top: sideLabelY, right: sideLabelX, transform: 'translateY(-50%)' },
-    { bottom: evenLabelY, right: evenLabelX },
+    { top: evenLabelY, left: `calc(${circleCentre} + ${evenLabelX})`, textAlign: 'left' },
+    { top: circleCentre, left: `calc(${circleCentre} + ${sideLabelX})`, transform: 'translateY(-50%)', textAlign: 'left' }, 
+    { bottom: evenLabelY, left: `calc(${circleCentre} + ${evenLabelX})`, textAlign: 'left' },
     { bottom: middleLabelY, left: middleLabelX, transform: 'translateX(-50%)' },
-    { bottom: evenLabelY, left: evenLabelX }, // big word
-    { top: sideLabelY, left: sideLabelX, transform: 'translateY(-50%)' },
-    { top: evenLabelY, left: evenLabelX }
+    { bottom: evenLabelY, right: `calc(${circleCentre} + ${evenLabelX})`, textAlign: 'right' },
+    { top: circleCentre, right: `calc(${circleCentre} + ${sideLabelX})`, transform: 'translateY(-50%)', textAlign: 'right' }, 
+    { top: evenLabelY, right: `calc(${circleCentre} + ${evenLabelX})`, textAlign: 'right' }               
 ];
+
 
 function generateVertexCoordinates() {
     const vertexCoords = [];
@@ -69,13 +70,19 @@ function drawLabels() {
         const label = document.createElement('div');
         label.classList.add('emotion-label');
         label.textContent = text;
+
         Object.assign(label.style, labelPositions[labelPosition]);
+        if (labelPositions[labelPosition].textAlign) {
+            label.style.textAlign = labelPositions[labelPosition].textAlign;
+        }
+
         scene.appendChild(label);
         requestAnimationFrame(() => {
             label.style.opacity = '1';
         });
     });
 }
+
 
 function findTopLabelProximities(normalisedX, normalisedY) {
     const vertexCoords = generateVertexCoordinates();

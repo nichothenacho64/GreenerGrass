@@ -1,42 +1,7 @@
 // high arousal score = high saturation
 // high perspective score = high luminance
 
-@import "styles.scss";
-
-$sdf: 60%;
-$ldf: 55%;
-
-$smtp1: 6%;
-$smtp2: $smtp1 * 2;
-
-$lmtp1: 12%;
-$lmtp2: $lmtp1 * 2;
-
-$emotion-1: hsl(270, $sdf + $smtp2, $ldf); 
-$emotion-2: hsl(250, $sdf + $smtp1, $ldf + $lmtp1); 
-$emotion-3: hsl(230, $sdf, $ldf + $lmtp2); 
-$emotion-4: hsl(210, $sdf - $smtp1, $ldf + $lmtp1); 
-$emotion-5: hsl(190, $sdf - $smtp2, $ldf); 
-$emotion-6: hsl(170, $sdf - $smtp1, $ldf - $lmtp1); 
-$emotion-7: hsl(150, $sdf, $ldf - $lmtp2);
-$emotion-8: hsl(130, $sdf + $smtp1, $ldf - $lmtp2);
-
-$circle-gradient: conic-gradient(
-    $emotion-1 0deg,
-    $emotion-2 45deg,
-    $emotion-3 90deg,
-    $emotion-4 135deg,
-    $emotion-5 180deg,
-    $emotion-6 225deg,
-    $emotion-7 270deg,
-    $emotion-8 315deg,
-    $emotion-1 360deg
-);
-
-// $octagon-size: min(70vmin, 500px); 
-$octagon-size: 50vmin;
-$circle-size: calc(#{$octagon-size} * 0.85);
-$dot-size: 20px;
+@import "constants";
 
 body { 
     display: flex;
@@ -124,7 +89,7 @@ body {
     color: white;
     position: fixed;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 0.45em;
     background: rgba(255, 255, 255, 0.5);
     padding: 0.3rem 0.6rem;
     border-radius: 7.5px;
@@ -135,7 +100,7 @@ body {
     color: white;
     position: absolute;
     font-weight: bold;
-    font-size: 0.65rem !important;
+    font-size: 0.45em !important;
     white-space: nowrap;
     opacity: 0;
     transition: opacity 0.4s ease-in-out; 

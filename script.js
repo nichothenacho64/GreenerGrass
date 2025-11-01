@@ -11,7 +11,7 @@ let isReady = false;
 let adminSet = false;
 
 if (isLocal && pageName !== "admin.html") {
-    window.location.replace("/admin.html");
+    window.location.replace("pages/admin.html");
 } else {
     socket = io();
     setupPage(socket);
@@ -62,7 +62,7 @@ function registerReadyHandlers() {
         console.log("All ready! Redirecting...");
         setTimeout(() => {
             if (!isLocal) {
-                window.location.href = "/emotion-wheel.html";
+                window.location.href = "pages/emotion-wheel.html";
             }
         }, pageChangeTime);
     });
