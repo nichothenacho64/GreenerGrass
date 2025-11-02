@@ -3,15 +3,8 @@
 
 @import "constants";
 
-body { 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-}
-
-#scene {
+#feedbackContainer {
+    margin: 40px;
     position: relative;
     width: $octagon-size;
     height: $octagon-size;
@@ -26,14 +19,13 @@ body {
     transform: translate(-50%, -50%);
     background: rgba(255, 255, 255, 0.3);
     clip-path: polygon(50% 0%,
-            85% 15%, 
+            85% 15%,
             100% 50%,
-            85% 85%, 
+            85% 85%,
             50% 100%,
             15% 85%,
             0% 50%,
-            15% 15%
-        );
+            15% 15%);
 }
 
 #mainCircle {
@@ -59,33 +51,13 @@ body {
         opacity: 0;
         transition: opacity 1s ease, transform 0.4s ease;
         pointer-events: none; // prevent interference with clicks
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.6); 
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
 
         &.visible {
             opacity: 1;
             transform: translate(-50%, -50%) scale(1);
         }
     }
-}
-
-// ! THIS IS TEMPORARY & HIDDEN IN THE FINAL THING!
-
-#coords {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-}
-
-#resetButton {
-    position: fixed;
-    bottom: 4.5rem;
-    right: 1.5rem;
-}
-
-#topLabels {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 1.5rem;
 }
 
 .emotion-label {
@@ -95,5 +67,5 @@ body {
     font-size: 0.45em !important;
     white-space: nowrap;
     opacity: 0;
-    transition: opacity 0.4s ease-in-out; 
+    transition: opacity 0.4s ease-in-out;
 }

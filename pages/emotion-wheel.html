@@ -4,23 +4,25 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/x-icon" href="assets/GreenerGrass_icon.svg"/>
     <title>Emotion Wheel</title>
     <link rel="stylesheet" href="../css/styles.css" type="text/css">
     <link rel="stylesheet" href="../css/stylesheets/emotion-wheel.css" type="text/css">
     <link rel="stylesheet" href="../css/stylesheets/main-page.css" type="text/css">
     <script src="/socket.io/socket.io.js"></script>
     <script type="module" src="../script.js" defer></script>
-    <script type="module" src="../emotionWheel.js" defer></script>
+    <script type="module" src="../scripts/emotionWheel.js" defer></script>
 </head>
 
 <body>
-    <div id="scene">
-        <div id="octagon"></div>
-        <div id="mainCircle"></div>
-        <div id="coords" class="feedback-label">Click inside the circle</div>
-        <div id="topLabels" class="feedback-label">Closest emotions: N/A</div> <!-- eventually move to admin.html -->
-        <button id="resetButton" class="feedback-label">Reset values</button>
+    <div id="centreContent"> 
+        <h3>A heading goes here</h3>
+        <div id="feedbackContainer">
+            <div id="octagon"></div>
+            <div id="mainCircle"></div>
+        </div>
     </div>
 </body>
+
 
 </html>

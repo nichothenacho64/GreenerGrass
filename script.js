@@ -1,4 +1,4 @@
-const readyButton = document.getElementById("readyButton");
+const nextPageButton = document.getElementById("nextPageButton");
 const readyStatus = document.getElementById("readyStatus");
 const pageChangeTime = 2000;
 
@@ -79,11 +79,11 @@ function setupAdminFeedback(socket) { // for the results for the admin page
 }
 
 function registerReadyHandlers() {
-    readyButton.addEventListener("click", () => {
+    nextPageButton.addEventListener("click", () => {
         if (isReady) return;
         isReady = true;
         socket.emit("clientReady");
-        readyButton.disabled = true;
+        nextPageButton.disabled = true; // ! add something about waiting for the other
     });
 
     socket.on("initialState", ({ readyCount, totalClients, adminExists }) => {
@@ -99,7 +99,7 @@ function registerReadyHandlers() {
     });
 
     socket.on("allReady", () => {
-        readyButton.textContent = "Redirecting to next page...";
+        nextPageButton.textContent = "Redirecting to next page...";
         console.log("All ready! Redirecting...");
         setTimeout(() => {
             if (!isLocal) {

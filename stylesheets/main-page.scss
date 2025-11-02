@@ -1,6 +1,13 @@
 body {
-    margin: 0; 
-    padding: 40px; 
-    border-inline: 5px solid red;
-    box-sizing: border-box; 
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    padding: 5vh; 
+    // border-inline: 5px solid red; // ! here for now, not permanent
+}
+
+#centreContent {
+    display: flex;
+    flex-direction: column;
 }

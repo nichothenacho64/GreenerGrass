@@ -1,6 +1,6 @@
 const mainCircle = document.getElementById("mainCircle");
-const coordsDisplay = document.getElementById("coords");
-const scene = document.getElementById("scene");
+// const coordsDisplay = document.getElementById("coords");
+const feedbackContainer = document.getElementById("feedbackContainer");
 const topLabels = document.getElementById("topLabels");
 const resetButton = document.getElementById("resetButton");
 
@@ -76,7 +76,7 @@ function drawLabels() {
             label.style.textAlign = labelPositions[labelPosition].textAlign;
         }
 
-        scene.appendChild(label);
+        feedbackContainer.appendChild(label);
         requestAnimationFrame(() => {
             label.style.opacity = "1";
         });
@@ -113,7 +113,7 @@ function showFeedback(topProximities) {
     const feedbackText = topProximities
         .map(proximity => `${labels[proximity.index - 1]}: ${proximity.proximity}%`) // the mapping happens here
         .join(topProximities.length === 1 ? "" : " and ");
-    topLabels.textContent = feedbackText;
+    return feedbackText;
 }
 
 function floatToMidi(value) {
@@ -126,14 +126,12 @@ function handleCircleClick(event, socket) {
     const { clickX, clickY, normalisedX, normalisedY } = getClickCoordinates(event);
 
     const coordsText = `Perspective score: ${normalisedX.toFixed(2)}, Arousal score: ${normalisedY.toFixed(2)}`; // ! NEW
-    coordsDisplay.textContent = coordsText;
+    // coordsDisplay.textContent = coordsText;
 
     showUserSelection(clickX, clickY);
 
     const topProximities = findTopLabelProximities(normalisedX, normalisedY);
-    showFeedback(topProximities);
-
-    const feedbackText = topLabels.textContent; 
+    const feedbackText = showFeedback(topProximities);
 
     socket.emit("clientFeedbackUpdate", { coordsText, feedbackText }); // for the admin
 

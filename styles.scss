@@ -2,6 +2,9 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&display=swap');
 
+
+// ! note: standardise font sizing
+
 html, body {
     overflow: hidden;
     overscroll-behavior: none; 
@@ -12,16 +15,37 @@ html, body {
 }
 
 button {
-    color: $primary-colour;
     font-family: "Merriweather", 'Times New Roman', Times, serif; // do not remove
+}
+
+#nextPageButton, #resetButton {
+    color: $primary-colour;
     background-color: white;
     border: 1px solid white;
     border-radius: 1em;
     padding: 1em 2em;
     font-size: 0.5em;
 
-    &:disabled {
+    &:disabled, &:hover {
         background-color: $disabled-white !important;
+    }
+}
+
+.large-button {
+    border-radius: 1em;
+    font-size: 0.65em;
+    padding: 1.75em 0;
+
+    &#primaryButton {
+        color: $primary-colour;
+        background-color: white;
+        border: 1px solid white;
+        margin-bottom: 0.5em;
+    }
+    &#secondaryButton {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.5);
+        border: 1px solid $secondary-colour;
     }
 }
 
@@ -35,19 +59,19 @@ button {
     z-index: 10;
 }
 
-.body-text {
+.information-text {
     font-size: 0.5em;
 }
 
 #titleText {
     position: fixed;
     text-align: center;
-    top: 20vh;
+    top: 25vh;
     left: 8em;
     right: 8em;
 }
 
-#readySection {
+#nextPageButton {
     position: fixed;
     bottom: $corner-margin; // ! temporary
     right: $corner-margin;
