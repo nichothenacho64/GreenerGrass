@@ -44,7 +44,7 @@ function setupPage() {
     if (pageName === "index.html") {
         registerReadyHandlers();
     } else if (pageName === "emotion-wheel.html") { 
-        import("./emotionWheel.js").then(({ mainCircleInteraction }) => {
+        import("./scripts/emotionWheel.js").then(({ mainCircleInteraction }) => {
             mainCircleInteraction(socket);
         });
     } else if (pageName === "admin.html") {

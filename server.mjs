@@ -1,9 +1,17 @@
-import express from "express";
-import http from "http";
-import { Server } from "socket.io";
-import path from "path";
-import { fileURLToPath } from "url";
+import {
+    logAdminMessage,
+    logClientMessage,
+    logMIDIMessage,
+    logServerMessage,
+    logSocketMessage
+} from "./scripts/serverLogger.js";
+
 import easymidi from "easymidi";
+import express from "express";
+import { fileURLToPath } from "url";
+import http from "http";
+import path from "path";
+import { Server } from "socket.io";
 
 const PORT = 3000;
 const __filename = fileURLToPath(import.meta.url)
@@ -26,7 +34,7 @@ function setupSocketEvents(io) {
         const readyCount = nonLocalClients.filter(client => client.isReady).length;
         const adminExists = [...state.clients.values()].some(client => client.identified && client.isLocal);
 
-        console.log(`[SOCKET.IO] User connected: ${socket.id}`);
+        logSocketMessage(`User connected: ${socket.id}`);
 
         socket.emit("initialState", { readyCount, totalClients, adminExists }); // for the new client
 
@@ -37,11 +45,11 @@ function setupSocketEvents(io) {
             if (windowName && windowName.toLowerCase().includes("admin")) {
                 client.isLocal = true;
                 client.identified = true;
-                console.log(`[ADMIN] Local (admin) client identified by windowName: ${windowName}`);
+                logAdminMessage(`Local (admin) client identified by windowName: ${windowName}`);
             } else {
                 client.isLocal = false;
                 client.identified = true;
-                console.log(`[CLIENT] Non-local client identified: ${windowName}`);
+                logClientMessage(`Non-local client identified: ${windowName}`);
             }
 
             updateReadyStatus(io, state);
@@ -53,7 +61,7 @@ function setupSocketEvents(io) {
         socket.on("disconnect", () => {
             state.clients.delete(socket.id);
             updateReadyStatus(io, state);
-            console.log(`[SOCKET.IO] User disconnected: ${socket.id}`);
+            logSocketMessage(`User disconnected: ${socket.id}`);
         });
     });
 }
@@ -85,14 +93,14 @@ function updateReadyStatus(io, state) {
     io.emit("updateReadyStatus", { readyCount, totalClients });
 
     if (totalClients > 0 && readyCount === totalClients) {
-        console.log("[SERVER] All clients are ready!"); // debugging
+        logServerMessage("All clients are ready!"); // debugging
         io.emit("allReady"); // change page
     }
 }
 
 function setupMIDIProcessing(io) {
     const MIDIOutput = new easymidi.Output("Web MIDI Bridge", true);
-    console.log("[MIDI] Output initialised:", MIDIOutput.name);
+    logMIDIMessage(`Output initialised: ${MIDIOutput.name}`);
 
     io.on("connection", (socket) => { // listening for midi data
         socket.on("sendMIDIData", (data) => {
@@ -101,12 +109,12 @@ function setupMIDIProcessing(io) {
             MIDIOutput.send("cc", { controller: 1, value: data.label1.proximity, channel: data.label1.index - 1 });
             MIDIOutput.send("cc", { controller: 2, value: data.label2.proximity, channel: data.label2.index - 1 });
 
-            console.log(`[MIDI] Received value 1: Index: ${data.label1.index}, Value: ${data.label1.proximity}`);
-            console.log(`[MIDI] Received value 2: Index: ${data.label2.index}, Value: ${data.label2.proximity}`);
+            logMIDIMessage(`Received value 1: Index: ${data.label1.index}, Value: ${data.label1.proximity}`);
+            logMIDIMessage(`Received value 2: Index: ${data.label2.index}, Value: ${data.label2.proximity}`);
         });
 
         socket.on("resetMIDI", () => {
-            console.log("[MIDI] Resetting all channels");
+            logMIDIMessage("Resetting all channels");
             for (let channel = 0; channel <= 15; channel++) {
                 MIDIOutput.send("cc", { controller: 0, value: 0, channel });
             }
@@ -116,7 +124,7 @@ function setupMIDIProcessing(io) {
 
 function startServer(server, port) {
     server.listen(port, () => {
-        console.log(`[SERVER] Chat running at http://localhost:${port}`);
+        logServerMessage(`Chat running at http://localhost:${port}`);
     });
 }
 
