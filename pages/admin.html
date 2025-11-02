@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8" />
     <title>Admin</title>
-    <link rel="stylesheet" type="text/css" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css" type="text/css">
+    <link rel="stylesheet" href="../css/styling/admin.css" type="text/css">
+    <link rel="stylesheet" href="../css/styling/main-page.css" type="text/css">
     <script src="/socket.io/socket.io.js"></script>
     <script type="module" src="../script.js"></script>
 </head>
@@ -18,6 +20,13 @@
             <li>Triggering the reset of the Max Patch (besides just when the installation is complete)</li>
         </ul>
     </div>
+
+
+    <div id="scene"> 
+        <div id="coords" class="feedback-label">Perspective score: N/A, Arousal score: N/A</div>
+        <div id="topLabels" class="feedback-label">Closest emotions: N/A</div>
+        <button id="resetButton" class="feedback-label">Reset values</button> 
+    </div> 
 </body>
 
 </html>

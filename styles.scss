@@ -13,7 +13,7 @@ html, body {
 
 button {
     color: $primary-colour;
-    font-family: "Merriweather", 'Times New Roman', Times, serif;
+    font-family: "Merriweather", 'Times New Roman', Times, serif; // do not remove
     background-color: white;
     border: 1px solid white;
     border-radius: 1em;
@@ -23,6 +23,16 @@ button {
     &:disabled {
         background-color: $disabled-white !important;
     }
+}
+
+.feedback-label { 
+    color: white;
+    font-weight: bold;
+    font-size: 0.45em;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 0.3rem 0.6rem;
+    border-radius: 7.5px;
+    z-index: 10;
 }
 
 .body-text {

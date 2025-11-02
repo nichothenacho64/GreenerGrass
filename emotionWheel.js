@@ -1,7 +1,7 @@
 const mainCircle = document.getElementById("mainCircle");
 const coordsDisplay = document.getElementById("coords");
 const scene = document.getElementById("scene");
-const feedback = document.getElementById("feedback");
+const topLabels = document.getElementById("topLabels");
 const resetButton = document.getElementById("resetButton");
 
 const oneLabelThreshold = 0.97;
@@ -20,20 +20,20 @@ const labels = [
 
 const circleCentre = "50%";
 const evenLabelY = "8%";
-const evenLabelX = "40%";  
-const sideLabelX = "55%";  
+const evenLabelX = "40%";
+const sideLabelX = "55%";
 const middleLabelX = "50%";
 const middleLabelY = "-8%";
 
 const labelPositions = [
     { top: middleLabelY, left: middleLabelX, transform: "translateX(-50%)" },
     { top: evenLabelY, left: `calc(${circleCentre} + ${evenLabelX})`, textAlign: "left" },
-    { top: circleCentre, left: `calc(${circleCentre} + ${sideLabelX})`, transform: "translateY(-50%)", textAlign: "left" }, 
+    { top: circleCentre, left: `calc(${circleCentre} + ${sideLabelX})`, transform: "translateY(-50%)", textAlign: "left" },
     { bottom: evenLabelY, left: `calc(${circleCentre} + ${evenLabelX})`, textAlign: "left" },
     { bottom: middleLabelY, left: middleLabelX, transform: "translateX(-50%)" },
     { bottom: evenLabelY, right: `calc(${circleCentre} + ${evenLabelX})`, textAlign: "right" },
-    { top: circleCentre, right: `calc(${circleCentre} + ${sideLabelX})`, transform: "translateY(-50%)", textAlign: "right" }, 
-    { top: evenLabelY, right: `calc(${circleCentre} + ${evenLabelX})`, textAlign: "right" }               
+    { top: circleCentre, right: `calc(${circleCentre} + ${sideLabelX})`, transform: "translateY(-50%)", textAlign: "right" },
+    { top: evenLabelY, right: `calc(${circleCentre} + ${evenLabelX})`, textAlign: "right" }
 ];
 
 
@@ -113,7 +113,7 @@ function showFeedback(topProximities) {
     const feedbackText = topProximities
         .map(proximity => `${labels[proximity.index - 1]}: ${proximity.proximity}%`) // the mapping happens here
         .join(topProximities.length === 1 ? "" : " and ");
-    feedback.textContent = feedbackText;
+    topLabels.textContent = feedbackText;
 }
 
 function floatToMidi(value) {
@@ -122,16 +122,21 @@ function floatToMidi(value) {
     return scaled;
 }
 
-function handleCircleClick(event, socket) { // things that happen when the circle gets clicked
+function handleCircleClick(event, socket) {
     const { clickX, clickY, normalisedX, normalisedY } = getClickCoordinates(event);
 
-    coordsDisplay.textContent = `Perspective score: ${normalisedX.toFixed(2)}, Arousal score: ${normalisedY.toFixed(2)}`;
+    const coordsText = `Perspective score: ${normalisedX.toFixed(2)}, Arousal score: ${normalisedY.toFixed(2)}`; // ! NEW
+    coordsDisplay.textContent = coordsText;
+
     showUserSelection(clickX, clickY);
 
     const topProximities = findTopLabelProximities(normalisedX, normalisedY);
     showFeedback(topProximities);
 
-    // eventually, I will have to deal with the case that there is only 1 emotion
+    const feedbackText = topLabels.textContent; 
+
+    socket.emit("clientFeedbackUpdate", { coordsText, feedbackText }); // for the admin
+
     emitMIDIData(socket, normalisedX, normalisedY, topProximities);
 }
 
@@ -166,11 +171,11 @@ function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
 
 export function mainCircleInteraction(socket) { // this is the export
     mainCircle.addEventListener("click", (event) => handleCircleClick(event, socket));
-    if (resetButton) { 
-    resetButton.addEventListener("click", () => { 
-        socket.emit("resetMIDI"); 
-    }); 
-}
+    if (resetButton) {
+        resetButton.addEventListener("click", () => {
+            socket.emit("resetMIDI"); 
+        });
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

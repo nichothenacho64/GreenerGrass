@@ -71,29 +71,21 @@ body {
 // ! THIS IS TEMPORARY & HIDDEN IN THE FINAL THING!
 
 #coords {
-    top: 1.5rem;
+    position: fixed;
+    bottom: 1.5rem;
     right: 1.5rem;
 }
 
 #resetButton {
-    top: 4.5rem;
+    position: fixed;
+    bottom: 4.5rem;
     right: 1.5rem;
 }
 
-#feedback {
-    top: 1.5rem;
-    left: 1.5rem;
-}
-
-.feedback-label { 
-    color: white;
+#topLabels {
     position: fixed;
-    font-weight: bold;
-    font-size: 0.45em;
-    background: rgba(255, 255, 255, 0.5);
-    padding: 0.3rem 0.6rem;
-    border-radius: 7.5px;
-    z-index: 10;
+    bottom: 1.5rem;
+    left: 1.5rem;
 }
 
 .emotion-label {

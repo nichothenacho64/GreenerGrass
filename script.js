@@ -39,17 +39,42 @@ function initialiseSocket() {
     socket.on("reconnect", () => socket.emit("clientIdentity", { windowName }));
 }
 
+
 function setupPage() {
     if (pageName === "index.html") {
         registerReadyHandlers();
-    } else if (pageName === "emotion-wheel.html") {
+    } else if (pageName === "emotion-wheel.html") { 
         import("./emotionWheel.js").then(({ mainCircleInteraction }) => {
             mainCircleInteraction(socket);
         });
     } else if (pageName === "admin.html") {
         console.log("Admin page loaded");
+        setupAdminFeedback(socket); 
     } else {
         console.warn("Unexpected page:", pageName);
+    }
+}
+
+function setupAdminFeedback(socket) { // for the results for the admin page
+    const coordsDisplay = document.getElementById("coords");
+    const topLabels = document.getElementById("topLabels");
+    const resetButton = document.getElementById("resetButton");
+
+    socket.on("updateClientFeedback", ({ coordsText, feedbackText }) => { // changing results
+        if (coordsDisplay) { 
+            coordsDisplay.textContent = coordsText; 
+            console.log("P/A updated");
+        };
+        if (topLabels) {
+            topLabels.textContent = feedbackText;
+            console.log("Top scores updated");
+        };
+    });
+
+    if (resetButton) {
+        resetButton.addEventListener("click", () => {
+            socket.emit("resetMIDI");
+        });
     }
 }
 
