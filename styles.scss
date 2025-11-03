@@ -5,9 +5,10 @@
 
 // ! note: standardise font sizing
 
-html, body {
+html,
+body {
     overflow: hidden;
-    overscroll-behavior: none; 
+    overscroll-behavior: none;
     font-family: "Merriweather", 'Times New Roman', Times, serif;
     color: white;
     background-color: $primary-colour;
@@ -18,7 +19,13 @@ button {
     font-family: "Merriweather", 'Times New Roman', Times, serif; // do not remove
 }
 
-#nextPageButton, #resetButton {
+h3 {
+    margin: 0 0 5vh 0;
+}
+
+.bottom-right-button,
+#resetButton {
+    // use a class instead of the identifier
     color: $primary-colour;
     background-color: white;
     border: 1px solid white;
@@ -26,7 +33,8 @@ button {
     padding: 1em 2em;
     font-size: 0.5em;
 
-    &:disabled, &:hover {
+    &:disabled,
+    &:hover {
         background-color: $disabled-white !important;
     }
 }
@@ -42,6 +50,7 @@ button {
         border: 1px solid white;
         margin-bottom: 0.5em;
     }
+
     &#secondaryButton {
         color: white;
         background-color: rgba(255, 255, 255, 0.5);
@@ -49,7 +58,7 @@ button {
     }
 }
 
-.feedback-label { 
+.feedback-label {
     color: white;
     font-weight: bold;
     font-size: 0.45em;
@@ -71,7 +80,7 @@ button {
     right: 8em;
 }
 
-#nextPageButton {
+.bottom-right-button {
     position: fixed;
     bottom: $corner-margin; // ! temporary
     right: $corner-margin;
@@ -79,6 +88,25 @@ button {
 
 #readyStatus {
     position: fixed;
-    top: $corner-margin;
+    top: $corner-margin-large;
     right: $corner-margin;
+}
+
+#waitingMessage {
+    color: $italic-text-colour;
+    font-size: 0.65em;
+    position: fixed;
+    bottom: $corner-margin;
+    left: $corner-margin;
+    font-style: italic;
+
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease-out, visibility 0s linear 0.4s;
+
+    &.visible {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.4s ease-out;
+    }
 }

@@ -1,11 +1,13 @@
 const mainCircle = document.getElementById("mainCircle");
 // const coordsDisplay = document.getElementById("coords");
 const feedbackContainer = document.getElementById("feedbackContainer");
-const topLabels = document.getElementById("topLabels");
+// const topLabels = document.getElementById("topLabels");
 const resetButton = document.getElementById("resetButton");
 
 const oneLabelThreshold = 0.97;
 const scaleRange = 2;
+
+let hasClicked = false; 
 
 const labels = [
     "Anger",
@@ -36,6 +38,7 @@ const labelPositions = [
     { top: evenLabelY, right: `calc(${circleCentre} + ${evenLabelX})`, textAlign: "right" }
 ];
 
+let lastSelection = null;
 
 function generateVertexCoordinates() {
     const vertexCoords = [];
@@ -92,7 +95,7 @@ function findTopLabelProximities(normalisedX, normalisedY) {
         let proximityRatio = clickProjection / vertexLen2;           // projection ratio along vertex direction
         proximityRatio = Math.min(Math.max(proximityRatio, 0), 1); // clamp 0–1
         return {
-            index: vertex.index + 1, // * starting from 1 
+            index: vertex.index + 1, 
             proximity: Math.round(proximityRatio * 100)
         };
     });
@@ -116,26 +119,29 @@ function showFeedback(topProximities) {
     return feedbackText;
 }
 
-function floatToMidi(value) {
+function floatToMIDI(value) {
     const clamped = Math.max(-scaleRange, Math.min(scaleRange, value)); // keep within range
     const scaled = Math.round(((clamped + scaleRange) / scaleRange) * 127); // map -2..2 to 0..127
     return scaled;
 }
 
 function handleCircleClick(event, socket) {
-    const { clickX, clickY, normalisedX, normalisedY } = getClickCoordinates(event);
+    if (hasClicked) return; // no data sent
 
-    const coordsText = `Perspective score: ${normalisedX.toFixed(2)}, Arousal score: ${normalisedY.toFixed(2)}`; // ! NEW
-    // coordsDisplay.textContent = coordsText;
+    const { clickX, clickY, normalisedX, normalisedY } = getClickCoordinates(event);
+    const coordsText = `Perspective score: ${normalisedX.toFixed(2)}, Arousal score: ${normalisedY.toFixed(2)}`;
 
     showUserSelection(clickX, clickY);
 
     const topProximities = findTopLabelProximities(normalisedX, normalisedY);
     const feedbackText = showFeedback(topProximities);
 
-    socket.emit("clientFeedbackUpdate", { coordsText, feedbackText }); // for the admin
+    socket.emit("clientFeedbackUpdate", { coordsText, feedbackText }); // always update admin
 
-    emitMIDIData(socket, normalisedX, normalisedY, topProximities);
+    lastSelection = { normalisedX, normalisedY, topProximities }; // storing the data but not emitting it just yet...
+    nextPageButton.disabled = false;
+    nextPageButton.textContent = "Next";
+    hasClicked = true;
 }
 
 function getClickCoordinates(event) {
@@ -154,8 +160,8 @@ function getClickCoordinates(event) {
 
 function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
     socket.emit("sendMIDIData", {
-        arousalScore: floatToMidi(normalisedY.toFixed(2)),
-        perspectiveScore: floatToMidi(normalisedX.toFixed(2)),
+        arousalScore: floatToMIDI(normalisedY.toFixed(2)),
+        perspectiveScore: floatToMIDI(normalisedX.toFixed(2)),
         label1: {
             index: topProximities[0].index,
             proximity: topProximities[0].proximity
@@ -167,13 +173,15 @@ function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
     });
 }
 
-export function mainCircleInteraction(socket) { // this is the export
-    mainCircle.addEventListener("click", (event) => handleCircleClick(event, socket));
-    if (resetButton) {
-        resetButton.addEventListener("click", () => {
-            socket.emit("resetMIDI"); 
-        });
+export function enableMIDIEmission(socket) {
+    if (hasClicked && lastSelection) {
+        const { normalisedX, normalisedY, topProximities } = lastSelection;
+        emitMIDIData(socket, normalisedX, normalisedY, topProximities);
     }
+}
+
+export function interactWithEmotionWheel(socket) { // this is the export
+    mainCircle.addEventListener("click", (event) => handleCircleClick(event, socket));
 }
 
 document.addEventListener("DOMContentLoaded", () => {

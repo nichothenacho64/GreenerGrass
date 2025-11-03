@@ -1,17 +1,19 @@
+@import "constants";
+
 #coords {
     position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-}
-
-#resetButton {
-    position: fixed;
-    top: 1.5rem;
-    right: 1.5rem;
+    bottom: 4.5rem;
+    left: $corner-margin;
 }
 
 #topLabels {
     position: fixed;
-    bottom: 1.5rem;
-    left: 1.5rem;
+    bottom: $corner-margin;
+    left: $corner-margin;
+}
+
+#resetButton {
+    position: fixed;
+    bottom: $corner-margin;
+    right: $corner-margin;
 }

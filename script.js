@@ -1,6 +1,12 @@
 const nextPageButton = document.getElementById("nextPageButton");
 const readyStatus = document.getElementById("readyStatus");
+
+const waitingMessage = document.getElementById("waitingMessage") || null;
+const waitingText = document.getElementById("waitingText") || null; // ! NEW
+const dots = document.getElementById("waitingDots") || null;
+
 const pageChangeTime = 2000;
+const dotChangeTime = 1000;
 
 const isLocal = window.location.hostname === "localhost";
 const path = window.location.pathname;
@@ -42,14 +48,16 @@ function initialiseSocket() {
 
 function setupPage() {
     if (pageName === "index.html") {
-        registerReadyHandlers();
-    } else if (pageName === "emotion-wheel.html") { 
-        import("./scripts/emotionWheel.js").then(({ mainCircleInteraction }) => {
-            mainCircleInteraction(socket);
+        navigateToNextPage("pages/emotion-wheel.html");
+    } else if (pageName === "emotion-wheel.html") { // in folder already, no need for pages/
+        navigateToNextPage("two-choices.html"); // attempting to implement this on every page
+        nextPageButton.disabled = true;
+        import("./scripts/emotionWheel.js").then(({ interactWithEmotionWheel }) => {
+            interactWithEmotionWheel(socket);
         });
     } else if (pageName === "admin.html") {
         console.log("Admin page loaded");
-        setupAdminFeedback(socket); 
+        setupAdminFeedback(socket);
     } else {
         console.warn("Unexpected page:", pageName);
     }
@@ -61,8 +69,8 @@ function setupAdminFeedback(socket) { // for the results for the admin page
     const resetButton = document.getElementById("resetButton");
 
     socket.on("updateClientFeedback", ({ coordsText, feedbackText }) => { // changing results
-        if (coordsDisplay) { 
-            coordsDisplay.textContent = coordsText; 
+        if (coordsDisplay) {
+            coordsDisplay.textContent = coordsText;
             console.log("P/A updated");
         };
         if (topLabels) {
@@ -78,16 +86,46 @@ function setupAdminFeedback(socket) { // for the results for the admin page
     }
 }
 
-function registerReadyHandlers() {
+function showWaitingMessage() {
+    if (waitingMessage && dots) {
+        waitingMessage.classList.add("visible"); // the fade in happens here
+
+        let dotCount = 1; // starting on one dot
+        dots.textContent = ".".repeat(dotCount); 
+
+        const maxDots = 3;
+        const dotInterval = setInterval(() => {
+            dotCount = (dotCount % maxDots) + 1;
+            dots.textContent = ".".repeat(dotCount);
+        }, dotChangeTime);
+
+        socket.on("allReady", () => {
+            clearInterval(dotInterval); 
+            waitingMessage.classList.remove("visible"); 
+        });
+    }
+}
+
+function navigateToNextPage(nextPage) { 
     nextPageButton.addEventListener("click", () => {
         if (isReady) return;
         isReady = true;
+
+        showWaitingMessage();
+
+        if (pageName === "emotion-wheel.html") {
+            import("./scripts/emotionWheel.js").then(({ enableMIDIEmission }) => {
+                enableMIDIEmission(socket);
+            });
+        }
+
         socket.emit("clientReady");
-        nextPageButton.disabled = true; // ! add something about waiting for the other
+        nextPageButton.disabled = true;
     });
 
+
     socket.on("initialState", ({ readyCount, totalClients, adminExists }) => {
-        readyStatus.textContent = `${readyCount} / ${totalClients}`;
+        readyStatus.textContent = `${readyCount} / ${totalClients}`; // when a client joins
         if (adminExists) {
             console.log("Admin already present!")
         };
@@ -96,14 +134,20 @@ function registerReadyHandlers() {
     socket.on("updateReadyStatus", ({ readyCount, totalClients }) => { // standard updating
         readyStatus.textContent = `${readyCount} / ${totalClients}`;
         console.log("Ready status updated");
+
+        if (waitingText) {
+            waitingText.textContent = totalClients > 2
+                ? "Waiting for other people"
+                : "Waiting for the other person";
+        }
     });
 
-    socket.on("allReady", () => {
+    socket.on("allReady", () => { // moving to the next page, should change the text contexgt
         nextPageButton.textContent = "Redirecting to next page...";
         console.log("All ready! Redirecting...");
         setTimeout(() => {
             if (!isLocal) {
-                window.location.href = "pages/emotion-wheel.html"
+                window.location.href = nextPage;
             };
         }, pageChangeTime);
     });
