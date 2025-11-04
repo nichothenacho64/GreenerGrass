@@ -2,19 +2,23 @@ const nextPageButton = document.getElementById("nextPageButton");
 const readyStatus = document.getElementById("readyStatus");
 
 const waitingMessage = document.getElementById("waitingMessage") || null;
-const waitingText = document.getElementById("waitingText") || null; // ! NEW
-const dots = document.getElementById("waitingDots") || null;
+const waitingText = document.getElementById("waitingText") || null;
+const waitingDots = document.getElementById("waitingDots") || null;
 
 const pageChangeTime = 2000;
 const dotChangeTime = 1000;
+// const totalPages = 6;
 
 const isLocal = window.location.hostname === "localhost";
 const path = window.location.pathname;
 const pageName = path === "/" ? "index.html" : path.substring(path.lastIndexOf("/") + 1);
 
+
 let socket; // reference for now, it may/may not connect
 let isReady = false;
 let windowName; // for identifying the client/admin
+let currentPageIndex = 0; 
+
 
 function initialiseClientType() {
     if (!window.name || window.name.trim() === "") {
@@ -45,19 +49,23 @@ function initialiseSocket() {
     socket.on("reconnect", () => socket.emit("clientIdentity", { windowName }));
 }
 
-
 function setupPage() {
     if (pageName === "index.html") {
-        navigateToNextPage("pages/emotion-wheel.html");
+        navigateToNextPage("pages/whitespace-page.html");
+
+    } else if (pageName === "whitespace-page.html") {
+        navigateToNextPage("two-choices.html");
+
     } else if (pageName === "emotion-wheel.html") { // in folder already, no need for pages/
-        navigateToNextPage("two-choices.html"); // attempting to implement this on every page
         nextPageButton.disabled = true;
         import("./scripts/emotionWheel.js").then(({ interactWithEmotionWheel }) => {
             interactWithEmotionWheel(socket);
         });
+        navigateToNextPage("two-choices.html"); // attempting to implement this on every page
+
     } else if (pageName === "admin.html") {
-        console.log("Admin page loaded");
         setupAdminFeedback(socket);
+
     } else {
         console.warn("Unexpected page:", pageName);
     }
@@ -87,26 +95,26 @@ function setupAdminFeedback(socket) { // for the results for the admin page
 }
 
 function showWaitingMessage() {
-    if (waitingMessage && dots) {
+    if (waitingMessage && waitingDots) {
         waitingMessage.classList.add("visible"); // the fade in happens here
 
         let dotCount = 1; // starting on one dot
-        dots.textContent = ".".repeat(dotCount); 
+        waitingDots.textContent = ".".repeat(dotCount);
 
         const maxDots = 3;
         const dotInterval = setInterval(() => {
             dotCount = (dotCount % maxDots) + 1;
-            dots.textContent = ".".repeat(dotCount);
+            waitingDots.textContent = ".".repeat(dotCount);
         }, dotChangeTime);
 
         socket.on("allReady", () => {
-            clearInterval(dotInterval); 
-            waitingMessage.classList.remove("visible"); 
+            clearInterval(dotInterval);
+            waitingMessage.classList.remove("visible");
         });
     }
 }
 
-function navigateToNextPage(nextPage) { 
+function navigateToNextPage(nextPage) { // add another optional parameter about the type (maybe a map)
     nextPageButton.addEventListener("click", () => {
         if (isReady) return;
         isReady = true;
@@ -124,12 +132,18 @@ function navigateToNextPage(nextPage) {
     });
 
 
-    socket.on("initialState", ({ readyCount, totalClients, adminExists }) => {
+    socket.on("initialState", ({ readyCount, totalClients, adminExists, currentPage }) => {
         readyStatus.textContent = `${readyCount} / ${totalClients}`; // when a client joins
-        if (adminExists) {
-            console.log("Admin already present!")
-        };
+
+        if (adminExists) console.log("The admin is here!");
+
+        if (typeof currentPage === "number") {
+            currentPageIndex = currentPage; // from the server
+        } else {
+            currentPageIndex = currentPageIndex; // fallback
+        }
     });
+
 
     socket.on("updateReadyStatus", ({ readyCount, totalClients }) => { // standard updating
         readyStatus.textContent = `${readyCount} / ${totalClients}`;
@@ -145,11 +159,16 @@ function navigateToNextPage(nextPage) {
     socket.on("allReady", () => { // moving to the next page, should change the text contexgt
         nextPageButton.textContent = "Redirecting to next page...";
         console.log("All ready! Redirecting...");
+        socket.emit("incrementPage");
         setTimeout(() => {
             if (!isLocal) {
                 window.location.href = nextPage;
             };
         }, pageChangeTime);
+    });
+
+    socket.on("pageChanged", ({ currentPage }) => { // forwhen another client moves pages
+        currentPageIndex = currentPage;
     });
 }
 
@@ -160,5 +179,8 @@ if (!adminRedirected) {
     initialiseSocket();
     setupPage();
 }
+
+// a few things to add
+// 1. a proper ending –> from the end page BACK to index.html
 
 

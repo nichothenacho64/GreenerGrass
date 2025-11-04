@@ -24,7 +24,10 @@ const io = new Server(server); // the server manager for all
 function setupSocketEvents(io) {
     const state = {
         clients: new Map(),
+        pageIndex: 0, 
+        totalPages: 6 // sequence steps, change later...
     };
+
 
     io.on("connection", (socket) => {
         state.clients.set(socket.id, { isLocal: false, isReady: false, identified: false });
@@ -73,6 +76,12 @@ function handleReadyEvents(io, socket, state) {
         client.isReady = true;
         updateReadyStatus(io, state);
     });
+
+    socket.on("incrementPage", () => {
+        state.pageIndex = (state.pageIndex + 1) % state.totalPages;
+        logServerMessage(`Page index incremented to ${state.pageIndex}`);
+        io.emit("pageChanged", { currentPage: state.pageIndex });
+    });
 }
 
 function handleFeedbackEvents(io, socket, state) {
@@ -93,8 +102,8 @@ function updateReadyStatus(io, state) {
     io.emit("updateReadyStatus", { readyCount, totalClients });
 
     if (totalClients > 0 && readyCount === totalClients) {
-        logServerMessage("All clients are ready!"); // debugging
-        io.emit("allReady"); // change page
+        logServerMessage("All clients are ready!");
+        io.emit("allReady", { currentPage: state.pageIndex }); // 
     }
 }
 
