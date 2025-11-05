@@ -7,18 +7,17 @@ const waitingDots = document.getElementById("waitingDots") || null;
 
 const pageChangeTime = 2000;
 const dotChangeTime = 1000;
-// const totalPages = 6;
 
 const isLocal = window.location.hostname === "localhost";
 const path = window.location.pathname;
 const pageName = path === "/" ? "index.html" : path.substring(path.lastIndexOf("/") + 1);
 
-
 let socket; // reference for now, it may/may not connect
 let isReady = false;
 let windowName; // for identifying the client/admin
-let currentPageIndex = 0; 
+let currentPageIndex = 0;
 
+let currentPage = { file: pageName, step: 1 };
 
 function initialiseClientType() {
     if (!window.name || window.name.trim() === "") {
@@ -47,21 +46,36 @@ function initialiseSocket() {
 
     socket.on("connect", () => socket.emit("clientIdentity", { windowName }));
     socket.on("reconnect", () => socket.emit("clientIdentity", { windowName }));
+
+    socket.on("initialState", ({ readyCount, totalClients, adminExists, currentPageIndex: idx, currentPage: page }) => {
+        readyStatus.textContent = `${readyCount} / ${totalClients}`;
+        if (adminExists) console.log("The admin is here!");
+
+        currentPageIndex = idx ?? 0;
+        currentPage = page ?? currentPage;
+        console.log(`Initial page from server: ${currentPage.file} (step ${currentPage.step})`); // for when a client joins
+    });
+
+    socket.on("pageChanged", ({ currentPageIndex: idx, currentPage: page }) => { // reflecting the page change
+        currentPageIndex = idx;
+        currentPage = page;
+        console.log(`Server updated page: ${page.file} (step ${page.step})`);
+    });
 }
 
 function setupPage() {
     if (pageName === "index.html") {
-        navigateToNextPage("pages/whitespace-page.html");
+        navigateToNextPage(); 
 
     } else if (pageName === "whitespace-page.html") {
-        navigateToNextPage("two-choices.html");
+        navigateToNextPage();
 
-    } else if (pageName === "emotion-wheel.html") { // in folder already, no need for pages/
+    } else if (pageName === "emotion-wheel.html") {
         nextPageButton.disabled = true;
         import("./scripts/emotionWheel.js").then(({ interactWithEmotionWheel }) => {
             interactWithEmotionWheel(socket);
         });
-        navigateToNextPage("two-choices.html"); // attempting to implement this on every page
+        navigateToNextPage();
 
     } else if (pageName === "admin.html") {
         setupAdminFeedback(socket);
@@ -114,7 +128,7 @@ function showWaitingMessage() {
     }
 }
 
-function navigateToNextPage(nextPage) { // add another optional parameter about the type (maybe a map)
+function navigateToNextPage() {
     nextPageButton.addEventListener("click", () => {
         if (isReady) return;
         isReady = true;
@@ -131,24 +145,8 @@ function navigateToNextPage(nextPage) { // add another optional parameter about 
         nextPageButton.disabled = true;
     });
 
-
-    socket.on("initialState", ({ readyCount, totalClients, adminExists, currentPage }) => {
-        readyStatus.textContent = `${readyCount} / ${totalClients}`; // when a client joins
-
-        if (adminExists) console.log("The admin is here!");
-
-        if (typeof currentPage === "number") {
-            currentPageIndex = currentPage; // from the server
-        } else {
-            currentPageIndex = currentPageIndex; // fallback
-        }
-    });
-
-
-    socket.on("updateReadyStatus", ({ readyCount, totalClients }) => { // standard updating
+    socket.on("updateReadyStatus", ({ readyCount, totalClients }) => {
         readyStatus.textContent = `${readyCount} / ${totalClients}`;
-        console.log("Ready status updated");
-
         if (waitingText) {
             waitingText.textContent = totalClients > 2
                 ? "Waiting for other people"
@@ -156,31 +154,28 @@ function navigateToNextPage(nextPage) { // add another optional parameter about 
         }
     });
 
-    socket.on("allReady", () => { // moving to the next page, should change the text contexgt
+    socket.on("allReady", ({ currentPage }) => {
         nextPageButton.textContent = "Redirecting to next page...";
-        console.log("All ready! Redirecting...");
+        console.log(`All ready! Moving to: ${currentPage.file} (step ${currentPage.step})`);
         socket.emit("incrementPage");
+
         setTimeout(() => {
             if (!isLocal) {
-                window.location.href = nextPage;
-            };
+                window.location.href = currentPage.file; 
+            }
         }, pageChangeTime);
-    });
-
-    socket.on("pageChanged", ({ currentPage }) => { // forwhen another client moves pages
-        currentPageIndex = currentPage;
     });
 }
 
 initialiseClientType();
 const adminRedirected = redirectAdmin();
-if (!adminRedirected) {
-    console.log("Socket initialised");
+if (!adminRedirected) { // only setting up the page IF the given client is NOT an admin
     initialiseSocket();
     setupPage();
 }
 
-// a few things to add
-// 1. a proper ending –> from the end page BACK to index.html
+// add a proper ending –> from the end page BACK to index.html
+// there should be a 10-15 second wait before the installation restarts
+// upon this restart, there should also be a MIDI reset triggered
 
 

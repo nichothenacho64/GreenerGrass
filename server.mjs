@@ -21,11 +21,20 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server); // the server manager for all
 
+const pageSequence = [
+    // { file: "index.html", step: 1 },
+    { file: "pages/whitespace-page.html", step: 1 },
+    { file: "two-choices.html", step: 1 },
+    { file: "emotion-wheel.html", step: 1 },
+    { file: "two-choices.html", step: 2 },       
+    { file: "whitespace-page.html", step: 2 },
+    { file: "../index.html", step: 2 }                 
+];
+
 function setupSocketEvents(io) {
     const state = {
         clients: new Map(),
-        pageIndex: 0, 
-        totalPages: 6 // sequence steps, change later...
+        currentPageIndex: 0,
     };
 
 
@@ -39,7 +48,13 @@ function setupSocketEvents(io) {
 
         logSocketMessage(`User connected: ${socket.id}`);
 
-        socket.emit("initialState", { readyCount, totalClients, adminExists }); // for the new client
+        socket.emit("initialState", {
+            readyCount,
+            totalClients,
+            adminExists,
+            currentPageIndex: state.currentPageIndex,
+            currentPage: pageSequence[state.currentPageIndex],
+        });
 
         socket.on("clientIdentity", ({ windowName }) => {
             const client = state.clients.get(socket.id);
@@ -78,17 +93,18 @@ function handleReadyEvents(io, socket, state) {
     });
 
     socket.on("incrementPage", () => {
-        state.pageIndex = (state.pageIndex + 1) % state.totalPages;
-        logServerMessage(`Page index incremented to ${state.pageIndex}`);
-        io.emit("pageChanged", { currentPage: state.pageIndex });
+        state.currentPageIndex = (state.currentPageIndex + 1) % pageSequence.length;
+        const currentPage = pageSequence[state.currentPageIndex];
+        logServerMessage(`Page advanced to: ${currentPage.file} (step ${currentPage.step})`);
+        io.emit("pageChanged", { currentPageIndex: state.currentPageIndex, currentPage });
     });
 }
 
 function handleFeedbackEvents(io, socket, state) {
-    socket.on("clientFeedbackUpdate", (data) => { 
+    socket.on("clientFeedbackUpdate", (data) => {
         for (const [clientSocketId, clientInfo] of state.clients.entries()) { // find admins
             if (clientInfo.isLocal) {
-                io.to(clientSocketId).emit("updateClientFeedback", data); 
+                io.to(clientSocketId).emit("updateClientFeedback", data);
             }
         }
     });
@@ -103,7 +119,8 @@ function updateReadyStatus(io, state) {
 
     if (totalClients > 0 && readyCount === totalClients) {
         logServerMessage("All clients are ready!");
-        io.emit("allReady", { currentPage: state.pageIndex }); // 
+        const currentPage = pageSequence[state.currentPageIndex];
+        io.emit("allReady", { currentPageIndex: state.currentPageIndex, currentPage });
     }
 }
 
