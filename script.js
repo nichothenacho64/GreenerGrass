@@ -65,9 +65,12 @@ function initialiseSocket() {
 
 function setupPage() {
     if (pageName === "index.html") {
-        navigateToNextPage(); 
+        navigateToNextPage();
 
     } else if (pageName === "whitespace-page.html") {
+        navigateToNextPage();
+
+    } else if (pageName === "two-choices.html") {
         navigateToNextPage();
 
     } else if (pageName === "emotion-wheel.html") {
@@ -154,17 +157,22 @@ function navigateToNextPage() {
         }
     });
 
-    socket.on("allReady", ({ currentPage }) => {
+    socket.on("allReady", ({ currentPageIndex: idx, currentPage: page }) => {
+        currentPageIndex = idx;
+        currentPage = page; // the current page is the next page
+
+        const { file, step } = currentPage;
         nextPageButton.textContent = "Redirecting to next page...";
-        console.log(`All ready! Moving to: ${currentPage.file} (step ${currentPage.step})`);
+        console.log(`All ready! Moving to: ${file} (step ${step})`);
         socket.emit("incrementPage");
 
         setTimeout(() => {
             if (!isLocal) {
-                window.location.href = currentPage.file; 
+                window.location.href = file;
             }
         }, pageChangeTime);
     });
+
 }
 
 initialiseClientType();

@@ -1,8 +1,5 @@
 const mainCircle = document.getElementById("mainCircle");
-// const coordsDisplay = document.getElementById("coords");
 const feedbackContainer = document.getElementById("feedbackContainer");
-// const topLabels = document.getElementById("topLabels");
-const resetButton = document.getElementById("resetButton");
 
 const oneLabelThreshold = 0.97;
 const scaleRange = 2;
@@ -86,7 +83,6 @@ function drawLabels() {
     });
 }
 
-
 function findTopLabelProximities(normalisedX, normalisedY) {
     const vertexCoords = generateVertexCoordinates();
     const proximities = vertexCoords.map(vertex => {
@@ -141,7 +137,6 @@ function handleCircleClick(event, socket) {
     lastSelection = { normalisedX, normalisedY, topProximities }; // storing the data but not emitting it just yet...
     nextPageButton.disabled = false;
     nextPageButton.textContent = "Next";
-    hasClicked = true;
 }
 
 function getClickCoordinates(event) {
