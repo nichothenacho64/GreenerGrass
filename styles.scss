@@ -23,6 +23,20 @@ h3 {
     margin: 0 0 5vh 0;
 }
 
+.full-screen-body {
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    padding: 5vh; 
+    // border-inline: 5px solid red; // ! here for now, not permanent
+
+    #centreContent {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
 .bottom-right-button,
 #resetButton {
     // use a class instead of the identifier
@@ -53,7 +67,7 @@ h3 {
 
     &.secondary-button {
         color: white;
-        background-color: rgba(255, 255, 255, 0.5);
+        background-color: $secondary-colour;
         border: 1px solid $secondary-colour;
     }
 }
@@ -62,7 +76,7 @@ h3 {
     color: white;
     font-weight: bold;
     font-size: 0.45em;
-    background: rgba(255, 255, 255, 0.5);
+    background-color: $secondary-colour;
     padding: 0.3rem 0.6rem;
     border-radius: 7.5px;
     z-index: 10;
