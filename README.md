@@ -1,3 +1,3 @@
 # GreenerGrass
 
-Using music as a means of making the difficult conversations easier with a sound installation. Hosted on a server that is responsible for the transmission of MIDI data to a Max Patch, which plays the sounds, while data is received through activity from 1-2 clients.
+Using music in a sound installation as a means of having more engaging and impactful conversations. Hosted on a server that is responsible for the transmission of MIDI data to a Max Patch, which plays the sounds, while data is received through activity from 1-2 clients.
