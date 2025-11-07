@@ -21,22 +21,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server); // the server manager for all
 
-const pageSequence = [
-    // { file: "index.html", step: 1 },
-    { file: "pages/whitespace-page.html", step: 1 },
-    { file: "two-choices.html", step: 1 },
-    { file: "emotion-wheel.html", step: 1 },
-    { file: "two-choices.html", step: 2 },       
-    { file: "whitespace-page.html", step: 2 },
-    { file: "../index.html", step: 2 }                 
-];
-
 function setupSocketEvents(io) {
     const state = {
         clients: new Map(),
-        currentPageIndex: 0,
     };
-
 
     io.on("connection", (socket) => {
         state.clients.set(socket.id, { isLocal: false, isReady: false, identified: false });
@@ -52,8 +40,6 @@ function setupSocketEvents(io) {
             readyCount,
             totalClients,
             adminExists,
-            currentPageIndex: state.currentPageIndex,
-            currentPage: pageSequence[state.currentPageIndex],
         });
 
         socket.on("clientIdentity", ({ windowName }) => {
@@ -91,13 +77,6 @@ function handleReadyEvents(io, socket, state) {
         client.isReady = true;
         updateReadyStatus(io, state);
     });
-
-    socket.on("incrementPage", () => {
-        state.currentPageIndex = (state.currentPageIndex + 1) % pageSequence.length;
-        const currentPage = pageSequence[state.currentPageIndex];
-        logServerMessage(`Page advanced to: ${currentPage.file} (step ${currentPage.step})`);
-        io.emit("pageChanged", { currentPageIndex: state.currentPageIndex, currentPage });
-    });
 }
 
 function handleFeedbackEvents(io, socket, state) {
@@ -119,8 +98,7 @@ function updateReadyStatus(io, state) {
 
     if (totalClients > 0 && readyCount === totalClients) {
         logServerMessage("All clients are ready!");
-        const currentPage = pageSequence[state.currentPageIndex];
-        io.emit("allReady", { currentPageIndex: state.currentPageIndex, currentPage });
+        io.emit("allReady"); // server no longer tells clients which page to go to
     }
 }
 

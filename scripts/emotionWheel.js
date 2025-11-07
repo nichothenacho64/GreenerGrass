@@ -1,10 +1,14 @@
+const nextPageButtons = document.querySelectorAll(".next-page-button"); 
 const mainCircle = document.getElementById("mainCircle");
 const feedbackContainer = document.getElementById("feedbackContainer");
 
-const oneLabelThreshold = 0.97;
 const scaleRange = 2;
 
-let hasClicked = false; 
+// ! TO ADD: Two sets of labels
+/* 
+1. The standard sets with indexes
+2. Mixed set - the index here is found by 
+*/
 
 const labels = [
     "Anger",
@@ -36,6 +40,7 @@ const labelPositions = [
 ];
 
 let lastSelection = null;
+let hasClicked = false;
 
 function generateVertexCoordinates() {
     const vertexCoords = [];
@@ -91,7 +96,7 @@ function findTopLabelProximities(normalisedX, normalisedY) {
         let proximityRatio = clickProjection / vertexLen2;           // projection ratio along vertex direction
         proximityRatio = Math.min(Math.max(proximityRatio, 0), 1); // clamp 0–1
         return {
-            index: vertex.index + 1, 
+            index: vertex.index + 1,
             proximity: Math.round(proximityRatio * 100)
         };
     });
@@ -101,11 +106,7 @@ function findTopLabelProximities(normalisedX, normalisedY) {
     const closest = proximities[0];
     const secondClosest = proximities[1];
 
-    if (closest.proximity / 100 >= oneLabelThreshold) { // one emotion threshold at 97% proximity
-        return [closest, closest]; // temporary
-    } else {
-        return [closest, secondClosest];
-    }
+    return [closest, secondClosest];
 }
 
 function showFeedback(topProximities) {
@@ -135,8 +136,10 @@ function handleCircleClick(event, socket) {
     socket.emit("clientFeedbackUpdate", { coordsText, feedbackText }); // always update admin
 
     lastSelection = { normalisedX, normalisedY, topProximities }; // storing the data but not emitting it just yet...
-    nextPageButton.disabled = false;
-    nextPageButton.textContent = "Next";
+    nextPageButtons.forEach(button => { // for simplicity's sake, even though there is only one button
+        button.disabled = false;
+        button.textContent = "Next"; 
+    });
 }
 
 function getClickCoordinates(event) {
