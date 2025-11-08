@@ -4,6 +4,7 @@ const readyStatus = document.getElementById("readyStatus");
 const waitingMessage = document.getElementById("waitingMessage") || null;
 const waitingText = document.getElementById("waitingText") || null;
 const waitingDots = document.getElementById("waitingDots") || null;
+const midiButton = document.getElementById("midiButton") || null;
 
 const pageChangeTime = 2000;
 const restartSequenceTime = 10000; // ! should be 10000 unless there is testing
@@ -16,7 +17,7 @@ const pageName = path === "/" ? "index.html" : path.substring(path.lastIndexOf("
 
 let socket;
 let isReady = false;
-let windowName; // for identifying the client/admin
+let windowName;
 let currentPageIndex = 0;
 let nextPageIndex = 0;
 
@@ -64,7 +65,6 @@ function initialiseSocket() {
             console.log("The admin is here!");
         }
     });
-
 }
 
 function setupPage() {
@@ -86,18 +86,20 @@ function setupPage() {
 
         setTimeout(() => {
             console.log("Resetting MIDI channels before restart...");
-            socket.emit("resetMIDI"); 
+            socket.emit("resetMIDI");
         }, restartSequenceTime - pageChangeTime); // since the message may take a bit of time to send
 
         setTimeout(() => {
             console.log("Restarting sequence: redirecting to index.html");
             window.location.href = isLocal ? "admin.html" : "../index.html";
-        }, restartSequenceTime); 
+        }, restartSequenceTime);
+
+    } else if (pageName === "admin.html") {
+        setupAdminFeedback(socket);
 
     } else {
         handleNextPageButtonClick();
         navigateToNextPage();
-        // console.warn("Unexpected page:", pageName);
     }
 }
 
@@ -154,18 +156,20 @@ function handleNextPageButtonClick() {
 
             console.log(`Button clicked: ${button.textContent.trim()}`);
 
-            if (pageName === "emotion-wheel.html") {
-                import("./scripts/emotionWheel.js").then(({ enableMIDIEmission }) => {
-                    console.log("Emotion wheel!");
-                    enableMIDIEmission(socket); // send MIDI for the current page
-                });
-            }
-
             socket.emit("clientReady"); // signal ready first
 
             nextPageButtons.forEach(button => button.disabled = true);
         });
     });
+
+    if (pageName === "emotion-wheel.html" && midiButton) {
+        midiButton.addEventListener("click", () => {
+            import("./scripts/emotionWheel.js").then(({ enableMIDIEmission }) => {
+                console.log("Emotion wheel!");
+                enableMIDIEmission(socket); // send MIDI for the current page
+            });
+        });
+    }
 }
 
 function navigateToNextPage() {
@@ -189,7 +193,7 @@ function navigateToNextPage() {
         nextPageIndex = (currentPageIndex + 1) % pageSequence.length;
         currentPageIndex = nextPageIndex;
 
-        if (nextPageButtons.length > 0) { // ✅ prevent null/empty loop
+        if (nextPageButtons.length > 0) {
             nextPageButtons.forEach(button => button.textContent = "Redirecting to next page...");
         }
         console.log(`Next page prepared: ${pageSequence[currentPageIndex]}`);

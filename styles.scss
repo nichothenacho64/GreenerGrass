@@ -47,7 +47,7 @@ h3 {
     }
 }
 
-.bottom-right-button,
+.bottom-right-button, .adjacent-button,
 #resetButton {
     // use a class instead of the identifier
     color: $primary-colour;
@@ -104,9 +104,15 @@ h3 {
     right: 8em;
 }
 
+.adjacent-button {
+    position: fixed;
+    bottom: $corner-margin; 
+    right: 10em;
+}
+
 .bottom-right-button {
     position: fixed;
-    bottom: $corner-margin; // ! temporary
+    bottom: $corner-margin;
     right: $corner-margin;
 }
 

@@ -1,8 +1,13 @@
-const nextPageButtons = document.querySelectorAll(".next-page-button"); 
+const nextPageButtons = document.querySelectorAll(".next-page-button");
 const mainCircle = document.getElementById("mainCircle");
 const feedbackContainer = document.getElementById("feedbackContainer");
 
+const instructionLabel = document.getElementById("instructionLabel");
+const midiButton = document.getElementById("midiButton");
+
 const scaleRange = 2;
+const instructionMessageFadeoutTime = 500;
+const dotFadeOutTime = 400;
 
 // ! TO ADD: Two sets of labels
 /* 
@@ -40,7 +45,7 @@ const labelPositions = [
 ];
 
 let lastSelection = null;
-let hasClicked = false;
+let nextButtonClicked = false;
 
 function generateVertexCoordinates() {
     const vertexCoords = [];
@@ -123,7 +128,16 @@ function floatToMIDI(value) {
 }
 
 function handleCircleClick(event, socket) {
-    if (hasClicked) return; // no data sent
+    if (nextButtonClicked) {
+        return;
+    } else {
+        if (instructionLabel) {
+            instructionLabel.style.opacity = "0";
+            setTimeout(() => {
+                instructionLabel.style.display = "none";
+            }, instructionMessageFadeoutTime);
+        }
+    }
 
     const { clickX, clickY, normalisedX, normalisedY } = getClickCoordinates(event);
     const coordsText = `Perspective score: ${normalisedX.toFixed(2)}, Arousal score: ${normalisedY.toFixed(2)}`;
@@ -137,10 +151,14 @@ function handleCircleClick(event, socket) {
 
     lastSelection = { normalisedX, normalisedY, topProximities }; // storing the data but not emitting it just yet...
 
-    nextPageButtons.forEach(button => { // for simplicity's sake, even though there is only one button
-        button.disabled = false;
-        button.textContent = "Next"; 
-    });
+    if (midiButton) {
+        midiButton.disabled = false;
+    }
+
+    // nextPageButtons.forEach(button => { // for simplicity's sake, even though there is only one button
+    //     button.disabled = false;
+    //     button.textContent = "Next";
+    // });
 }
 
 function getClickCoordinates(event) {
@@ -170,11 +188,15 @@ function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
             proximity: topProximities[1].proximity
         }
     });
+
+    console.log("Animation triggered!");
+    mainCircle.classList.remove("flash");
+    void mainCircle.offsetWidth; // resetting the animation
+    mainCircle.classList.add("flash");
 }
 
 export function enableMIDIEmission(socket) {
     if (lastSelection) {
-        hasClicked = true;
         const { normalisedX, normalisedY, topProximities } = lastSelection;
         emitMIDIData(socket, normalisedX, normalisedY, topProximities);
     } else {
@@ -187,6 +209,28 @@ export function interactWithEmotionWheel(socket) { // this is the export
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("Labels drawn");
     drawLabels();
+
+    midiButton.addEventListener("click", () => {
+        midiButton.disabled = true;
+        nextPageButtons.forEach(button => {
+            button.disabled = false;
+            button.textContent = "Next";
+        });
+
+        const previousDot = mainCircle.querySelector(".user-selection");
+        if (previousDot) {
+            previousDot.style.transition = `opacity ${dotFadeOutTime / 1000}s ease`;
+            console.log(previousDot.style.transition);
+            previousDot.style.opacity = "0";
+            setTimeout(() => previousDot.remove(), dotFadeOutTime);
+        }
+    });
+
+    nextPageButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            nextButtonClicked = true;
+            midiButton.style.opacity = 0;
+        });
+    });
 });

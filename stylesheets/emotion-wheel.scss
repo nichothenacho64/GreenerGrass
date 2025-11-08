@@ -1,6 +1,3 @@
-// high arousal score = high saturation
-// high perspective score = high luminance
-
 @import "constants";
 
 #feedbackContainer {
@@ -10,6 +7,18 @@
     height: $octagon-size;
 }
 
+#instructionLabel {
+    position: absolute;
+    left: $corner-margin-large;
+    top: 40vh;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 0.9em;
+    max-width: 10em;
+    opacity: 1;
+    transition: opacity 1s ease;
+}
+
 #octagon {
     position: absolute;
     top: 50%;
@@ -17,7 +26,7 @@
     width: $octagon-size;
     height: $octagon-size;
     transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.3);
+    background: $disabled-white;
     clip-path: polygon(50% 0%,
             85% 15%,
             100% 50%,
@@ -38,6 +47,10 @@
     background: $circle-gradient;
     transform: translate(-50%, -50%);
     cursor: crosshair; // for choosing the cursor type; maybe this won't be needed for later
+
+    &.flash {
+        animation: flashPulse 1s ease;
+    }
 
     .user-selection {
         position: absolute;
@@ -67,4 +80,21 @@
     white-space: nowrap;
     opacity: 0;
     transition: opacity 0.4s ease-in-out;
+}
+
+@keyframes flashPulse {
+    0% {
+        filter: brightness(1);
+        box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+    }
+
+    50% {
+        filter: brightness(2);
+        box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+    }
+
+    100% {
+        filter: brightness(1);
+        box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+    }
 }
