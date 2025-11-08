@@ -1,4 +1,4 @@
-const nextPageButtons = document.querySelectorAll(".next-page-button"); 
+const nextPageButtons = document.querySelectorAll(".next-page-button");
 const readyStatus = document.getElementById("readyStatus");
 
 const waitingMessage = document.getElementById("waitingMessage") || null;
@@ -6,6 +6,7 @@ const waitingText = document.getElementById("waitingText") || null;
 const waitingDots = document.getElementById("waitingDots") || null;
 
 const pageChangeTime = 2000;
+const restartSequenceTime = 10000; // ! should be 10000 unless there is testing
 const dotChangeTime = 1000;
 const directoryChangeIndex = 1;
 
@@ -32,9 +33,9 @@ function initialiseClientType() {
         if (pageName === "pages/admin.html" || pageName === "admin.html" || isLocal) {
             window.name = "admin"; // mark as admin
         } else {
-            const numUniqueClientIdentifiers = 10000
-            const clientIdentifier = Math.floor(Math.random() * numUniqueClientIdentifiers)
-            window.name = `client-${clientIdentifier}`; // unique client
+            const numUniqueClientIdentifiers = 10000;
+            const clientIdentifier = Math.floor(Math.random() * numUniqueClientIdentifiers);
+            window.name = `client-${clientIdentifier}`;
         }
     }
     windowName = window.name;
@@ -56,9 +57,14 @@ function initialiseSocket() {
     socket.on("reconnect", () => socket.emit("clientIdentity", { windowName }));
 
     socket.on("initialState", ({ readyCount, totalClients, adminExists }) => {
-        readyStatus.textContent = `${readyCount} / ${totalClients}`;
-        if (adminExists) console.log("The admin is here!");
+        if (readyStatus) {
+            readyStatus.textContent = `${readyCount} / ${totalClients}`;
+        }
+        if (adminExists) {
+            console.log("The admin is here!");
+        }
     });
+
 }
 
 function setupPage() {
@@ -67,32 +73,31 @@ function setupPage() {
     console.log('Current page:', pageSequence[currentPageIndex]);
     console.log('Next page:', pageSequence[(currentPageIndex + 1) % pageSequence.length]);
 
-    if (pageName === "index.html") {
-        // navigateToNextPage("pages/choose-wheel.html");
-        navigateToNextPage();
-
-    } else if (pageName === "chat.html") {
-        // navigateToNextPage("final-page.html");
-        navigateToNextPage();
-
-    } else if (pageName === "choose-wheel.html") {
-        // navigateToNextPage("emotion-wheel.html");
-        navigateToNextPage();
-
-    } else if (pageName === "emotion-wheel.html") {
+    if (pageName === "emotion-wheel.html") {
         nextPageButtons.forEach(button => button.disabled = true);
         import("./scripts/emotionWheel.js").then(({ interactWithEmotionWheel }) => {
             interactWithEmotionWheel(socket);
         });
-        // navigateToNextPage("chat.html");
+        handleNextPageButtonClick();
         navigateToNextPage();
 
-    } else if (pageName === "admin.html") {
-        // setupAdminFeedback(socket);
-        navigateToNextPage();
+    } else if (pageName === "final-page.html") {
+        console.log("Restarting for the next users!");
+
+        setTimeout(() => {
+            console.log("Resetting MIDI channels before restart...");
+            socket.emit("resetMIDI"); 
+        }, restartSequenceTime - pageChangeTime); // since the message may take a bit of time to send
+
+        setTimeout(() => {
+            console.log("Restarting sequence: redirecting to index.html");
+            window.location.href = isLocal ? "admin.html" : "../index.html";
+        }, restartSequenceTime); 
 
     } else {
-        console.warn("Unexpected page:", pageName);
+        handleNextPageButtonClick();
+        navigateToNextPage();
+        // console.warn("Unexpected page:", pageName);
     }
 }
 
@@ -105,11 +110,11 @@ function setupAdminFeedback(socket) { // for the results for the admin page
         if (coordsDisplay) {
             coordsDisplay.textContent = coordsText;
             console.log("P/A updated");
-        };
+        }
         if (topLabels) {
             topLabels.textContent = feedbackText;
             console.log("Top scores updated");
-        };
+        }
     });
 
     if (resetButton) {
@@ -139,7 +144,7 @@ function showWaitingMessage() {
     }
 }
 
-function navigateToNextPage() {
+function handleNextPageButtonClick() {
     nextPageButtons.forEach(button => {
         button.addEventListener("click", () => {
             if (isReady) return;
@@ -151,6 +156,7 @@ function navigateToNextPage() {
 
             if (pageName === "emotion-wheel.html") {
                 import("./scripts/emotionWheel.js").then(({ enableMIDIEmission }) => {
+                    console.log("Emotion wheel!");
                     enableMIDIEmission(socket); // send MIDI for the current page
                 });
             }
@@ -160,9 +166,13 @@ function navigateToNextPage() {
             nextPageButtons.forEach(button => button.disabled = true);
         });
     });
+}
 
+function navigateToNextPage() {
     socket.on("updateReadyStatus", ({ readyCount, totalClients }) => {
-        readyStatus.textContent = `${readyCount} / ${totalClients}`;
+        if (readyStatus) {
+            readyStatus.textContent = `${readyCount} / ${totalClients}`;
+        }
         if (waitingText) {
             waitingText.textContent = totalClients > 2
                 ? "Waiting for other people"
@@ -172,22 +182,24 @@ function navigateToNextPage() {
 
     socket.on("allReady", () => {
         currentPageIndex = pageSequence.indexOf(pageName);
-        if (currentPageIndex === -1) { 
+        if (currentPageIndex === -1) {
             currentPageIndex = 0;
-            console.warn("Returning to index.html as the page's index was not found"); 
-        };  
+            console.warn("Returning to index.html as the page's index was not found");
+        }
         nextPageIndex = (currentPageIndex + 1) % pageSequence.length;
         currentPageIndex = nextPageIndex;
 
-        nextPageButtons.forEach(button => button.textContent = "Redirecting to next page...");
+        if (nextPageButtons.length > 0) { // ✅ prevent null/empty loop
+            nextPageButtons.forEach(button => button.textContent = "Redirecting to next page...");
+        }
         console.log(`Next page prepared: ${pageSequence[currentPageIndex]}`);
 
         setTimeout(() => {
             if (!isLocal) {
                 if (nextPageIndex === directoryChangeIndex) {
-                    window.location.href = "pages/" + pageSequence[currentPageIndex]; 
+                    window.location.href = "pages/" + pageSequence[currentPageIndex];
                 } else {
-                    window.location.href = pageSequence[currentPageIndex]; 
+                    window.location.href = pageSequence[currentPageIndex];
                 }
             }
         }, pageChangeTime);
@@ -201,9 +213,5 @@ if (!adminRedirected) { // only setting up the page IF the given client is NOT a
     initialiseSocket();
     setupPage();
 }
-
-// add a proper ending –> from the end page BACK to index.html
-// there should be a 10-15 second wait before the installation restarts
-// upon this restart, there should also be a MIDI reset triggered
 
 

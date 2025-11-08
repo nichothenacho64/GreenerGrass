@@ -14,8 +14,8 @@ import path from "path";
 import { Server } from "socket.io";
 
 const PORT = 3000;
-const __filename = fileURLToPath(import.meta.url)
-const baseDirectory = path.dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const baseDirectory = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);

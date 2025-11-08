@@ -136,6 +136,7 @@ function handleCircleClick(event, socket) {
     socket.emit("clientFeedbackUpdate", { coordsText, feedbackText }); // always update admin
 
     lastSelection = { normalisedX, normalisedY, topProximities }; // storing the data but not emitting it just yet...
+
     nextPageButtons.forEach(button => { // for simplicity's sake, even though there is only one button
         button.disabled = false;
         button.textContent = "Next"; 
@@ -172,9 +173,12 @@ function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
 }
 
 export function enableMIDIEmission(socket) {
-    if (hasClicked && lastSelection) {
+    if (lastSelection) {
+        hasClicked = true;
         const { normalisedX, normalisedY, topProximities } = lastSelection;
         emitMIDIData(socket, normalisedX, normalisedY, topProximities);
+    } else {
+        console.log("MIDI emission is not enabled yet");
     }
 }
 

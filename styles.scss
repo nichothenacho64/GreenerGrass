@@ -26,7 +26,7 @@ h3 {
 .full-screen-body {
     display: flex;
     justify-content: center;
-    height: 100vh;
+    height: 90vh;
     margin: 0;
     padding: 5vh; 
     // border-inline: 5px solid red; // ! here for now, not permanent
@@ -34,6 +34,16 @@ h3 {
     #centreContent {
         display: flex;
         flex-direction: column;
+    }
+
+    #titleText {
+        top: 40vh;
+        left: 5em;
+        right: 5em;
+        
+        h3 {
+            margin: 0;
+        }
     }
 }
 
