@@ -108,7 +108,7 @@ function setupMIDIProcessing(io) {
 
     io.on("connection", (socket) => { // listening for midi data
         socket.on("sendMIDIData", (data) => {
-            MIDIOutput.send("cc", { controller: 10, value: data.perspectiveScore, channel: 10 }); // ! the channels may need to differ
+            MIDIOutput.send("cc", { controller: 10, value: data.perspectiveScore, channel: 10 }); 
             MIDIOutput.send("cc", { controller: 10, value: data.arousalScore, channel: 11 });
             MIDIOutput.send("cc", { controller: 1, value: data.label1.proximity, channel: data.label1.index - 1 });
             MIDIOutput.send("cc", { controller: 2, value: data.label2.proximity, channel: data.label2.index - 1 });
@@ -118,10 +118,11 @@ function setupMIDIProcessing(io) {
         });
 
         socket.on("resetMIDI", () => {
-            logMIDIMessage("Resetting all channels");
             for (let channel = 0; channel <= 15; channel++) {
                 MIDIOutput.send("cc", { controller: 0, value: 0, channel });
             }
+            
+            logMIDIMessage("Resetting all channels");
         });
     });
 }
