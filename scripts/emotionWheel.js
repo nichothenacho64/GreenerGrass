@@ -1,3 +1,9 @@
+import {
+    applyEmotionColours,
+    getWheelChoice,
+    getOriginalLabelIndex
+} from "./emotionWheelHelpers.js";
+
 const nextPageButtons = document.querySelectorAll(".next-page-button");
 const mainCircle = document.getElementById("mainCircle");
 const feedbackContainer = document.getElementById("feedbackContainer");
@@ -14,6 +20,7 @@ const dotFadeOutTime = 400;
 1. The standard sets with indexes
 2. Mixed set - the index here is found by 
 */
+// ! there should be a list called usedLabels that takes the values of another
 
 const labels = [
     "Anger",
@@ -47,6 +54,8 @@ const labelPositions = [
 let lastSelection = null;
 let nextButtonClicked = false;
 
+const currentLabels = getWheelChoice(labels);
+
 function generateVertexCoordinates() {
     const vertexCoords = [];
     for (let i = 0; i < 8; i++) {
@@ -76,10 +85,10 @@ function showUserSelection(x, y) {
 }
 
 function drawLabels() {
-    labels.forEach((text, labelPosition) => {
+    currentLabels.forEach((labelObj, labelPosition) => {
         const label = document.createElement("div");
         label.classList.add("emotion-label");
-        label.textContent = text;
+        label.textContent = labelObj.text;
 
         Object.assign(label.style, labelPositions[labelPosition]);
         if (labelPositions[labelPosition].textAlign) {
@@ -116,7 +125,10 @@ function findTopLabelProximities(normalisedX, normalisedY) {
 
 function showFeedback(topProximities) {
     const feedbackText = topProximities
-        .map(proximity => `${labels[proximity.index - 1]}: ${proximity.proximity}%`) // the mapping happens here
+        .map(proximity => {
+            const matchingLabel = labels[proximity.index - 1];
+            return `${matchingLabel}: ${proximity.proximity}%`;
+        })
         .join(topProximities.length === 1 ? "" : " and ");
     return feedbackText;
 }
@@ -171,18 +183,18 @@ function getClickCoordinates(event) {
 }
 
 function flashEmotionWheel(topProximities) {
-    console.log("Animation triggered!");
     mainCircle.classList.remove("flash");
-    void mainCircle.offsetWidth; 
+    void mainCircle.offsetWidth;
     mainCircle.classList.add("flash");
 
     const emotionLabels = document.querySelectorAll(".emotion-label");
 
     topProximities.slice(0, 2).forEach(({ index }) => {
-        const label = emotionLabels[index - 1];
+        const visualIndex = index - 1;
+        const label = emotionLabels[visualIndex];
         if (label) {
             label.classList.remove("flash");
-            void label.offsetWidth; 
+            void label.offsetWidth;
             label.classList.add("flash");
         }
     });
@@ -193,11 +205,11 @@ function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
         arousalScore: floatToMIDI(normalisedY.toFixed(2)),
         perspectiveScore: floatToMIDI(normalisedX.toFixed(2)),
         label1: {
-            index: topProximities[0].index,
+            index: getOriginalLabelIndex(topProximities[0].index, currentLabels),
             proximity: topProximities[0].proximity
         },
         label2: {
-            index: topProximities[1].index,
+            index: getOriginalLabelIndex(topProximities[1].index, currentLabels),
             proximity: topProximities[1].proximity
         }
     });
@@ -219,6 +231,8 @@ export function interactWithEmotionWheel(socket) { // this is the export
 
 document.addEventListener("DOMContentLoaded", () => {
     drawLabels();
+    applyEmotionColours(currentLabels);
+    console.log(currentLabels);
 
     midiButton.addEventListener("click", () => {
         midiButton.disabled = true;
@@ -230,7 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const previousDot = mainCircle.querySelector(".user-selection");
         if (previousDot) {
             previousDot.style.transition = `opacity ${dotFadeOutTime / 1000}s ease`;
-            console.log(previousDot.style.transition);
             previousDot.style.opacity = "0";
             setTimeout(() => previousDot.remove(), dotFadeOutTime);
         }

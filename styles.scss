@@ -13,6 +13,7 @@ body {
     color: white;
     background-color: $primary-colour;
     font-size: 1.75em; // previously 1.6em
+    transition: background-color 1s ease-in-out;
 }
 
 button {
@@ -76,6 +77,13 @@ h3 {
     }
 
     &.secondary-button {
+        color: white;
+        background-color: $secondary-colour;
+        border: 1px solid $secondary-colour;
+        margin-bottom: 0.5em;
+    }
+
+    &.tertiary-button {
         color: white;
         background-color: $secondary-colour;
         border: 1px solid $secondary-colour;

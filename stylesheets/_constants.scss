@@ -1,10 +1,10 @@
 // key styles
 
-$primary-colour: #121238;
+$primary-colour: var(--primary-colour, #121238); // updated dynamically OR just simply the main colour
 $italic-text-colour: rgba(255, 255, 255, 0.8);
 $secondary-colour: rgba(255, 255, 255, 0.5);
 $disabled-white: rgba(255, 255, 255, 0.3);
-$corner-margin: 1.5rem; 
+$corner-margin: 1.5rem;
 $corner-margin-large: 4.5rem;
 
 // for emotion-wheel.html
@@ -18,25 +18,26 @@ $smtp2: $smtp1 * 2;
 $lmtp1: 12%;
 $lmtp2: $lmtp1 * 2;
 
-$emotion-1: hsl(270, $sdf + $smtp2, $ldf); 
-$emotion-2: hsl(250, $sdf + $smtp1, $ldf + $lmtp1); 
-$emotion-3: hsl(230, $sdf, $ldf + $lmtp2); 
-$emotion-4: hsl(210, $sdf - $smtp1, $ldf + $lmtp1); 
-$emotion-5: hsl(190, $sdf - $smtp2, $ldf); 
-$emotion-6: hsl(170, $sdf - $smtp1, $ldf - $lmtp1); 
-$emotion-7: hsl(150, $sdf, $ldf - $lmtp2);
-$emotion-8: hsl(130, $sdf + $smtp1, $ldf - $lmtp2);
+:root { // for purposes of modification, it has to be written with CSS like syntax :(
+    --emotion-1: hsl(270, #{$sdf + $smtp2}, #{$ldf});
+    --emotion-2: hsl(250, #{$sdf + $smtp1}, #{$ldf + $lmtp1});
+    --emotion-3: hsl(230, #{$sdf}, #{$ldf + $lmtp2});
+    --emotion-4: hsl(210, #{$sdf - $smtp1}, #{$ldf + $lmtp1});
+    --emotion-5: hsl(190, #{$sdf - $smtp2}, #{$ldf});
+    --emotion-6: hsl(170, #{$sdf - $smtp1}, #{$ldf - $lmtp1});
+    --emotion-7: hsl(150, #{$sdf}, #{$ldf - $lmtp2});
+}
 
 $circle-gradient: conic-gradient(
-    $emotion-1 0deg,
-    $emotion-2 45deg,
-    $emotion-3 90deg,
-    $emotion-4 135deg,
-    $emotion-5 180deg,
-    $emotion-6 225deg,
-    $emotion-7 270deg,
-    $emotion-8 315deg,
-    $emotion-1 360deg
+    var(--emotion-1) 0deg,
+    var(--emotion-2) 45deg,
+    var(--emotion-3) 90deg,
+    var(--emotion-4) 135deg,
+    var(--emotion-5) 180deg,
+    var(--emotion-6) 225deg,
+    var(--emotion-7) 270deg,
+    var(--emotion-8) 315deg,
+    var(--emotion-1) 360deg
 );
 
 $octagon-size: 50vmin;

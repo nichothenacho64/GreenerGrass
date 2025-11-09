@@ -15,12 +15,6 @@ const isLocal = window.location.hostname === "localhost";
 const path = window.location.pathname;
 const pageName = path === "/" ? "index.html" : path.substring(path.lastIndexOf("/") + 1);
 
-let socket;
-let isReady = false;
-let windowName;
-let currentPageIndex = 0;
-let nextPageIndex = 0;
-
 const pageSequence = [
     "index.html",
     "choose-wheel.html",
@@ -28,6 +22,12 @@ const pageSequence = [
     "chat.html",
     "final-page.html"
 ];
+
+let socket;
+let isReady = false;
+let windowName;
+let currentPageIndex = 0;
+let nextPageIndex = 0;
 
 function initialiseClientType() {
     if (!window.name || window.name.trim() === "") {
@@ -68,20 +68,21 @@ function initialiseSocket() {
 }
 
 function setupPage() {
-    console.log('Texted name', pageName);
+    const storedWheel = sessionStorage.getItem("chosenWheel") || "default";
+
+    let primaryColour = "#121238";
+
+    if (storedWheel === "alphabetical") {
+        primaryColour = "#38121d";
+    } else if (storedWheel === "random") {
+        primaryColour = "#2d1238";
+    }
+
+    document.documentElement.style.setProperty("--primary-colour", primaryColour);
+
     currentPageIndex = pageSequence.indexOf(pageName);
-    console.log('Current page:', pageSequence[currentPageIndex]);
-    console.log('Next page:', pageSequence[(currentPageIndex + 1) % pageSequence.length]);
 
-    if (pageName === "emotion-wheel.html") {
-        nextPageButtons.forEach(button => button.disabled = true);
-        import("./scripts/emotionWheel.js").then(({ interactWithEmotionWheel }) => {
-            interactWithEmotionWheel(socket);
-        });
-        handleNextPageButtonClick();
-        navigateToNextPage();
-
-    } else if (pageName === "final-page.html") {
+    if (pageName === "final-page.html") {
         console.log("Restarting for the next users!");
 
         setTimeout(() => {
@@ -91,6 +92,7 @@ function setupPage() {
 
         setTimeout(() => {
             console.log("Restarting sequence: redirecting to index.html");
+            sessionStorage.removeItem("chosenWheel");
             window.location.href = isLocal ? "admin.html" : "../index.html";
         }, restartSequenceTime);
 
@@ -98,6 +100,13 @@ function setupPage() {
         setupAdminFeedback(socket);
 
     } else {
+        if (pageName === "emotion-wheel.html") {
+            nextPageButtons.forEach(button => button.disabled = true);
+            import("./scripts/emotionWheel.js").then(({ interactWithEmotionWheel }) => {
+                interactWithEmotionWheel(socket);
+            });
+        }
+
         handleNextPageButtonClick();
         navigateToNextPage();
     }
@@ -150,13 +159,18 @@ function handleNextPageButtonClick() {
     nextPageButtons.forEach(button => {
         button.addEventListener("click", () => {
             if (isReady) return;
+
+            if (pageName === "pages/choose-wheel.html" || pageName === "choose-wheel.html") {
+                const storedWheel = button.id;
+                sessionStorage.setItem("chosenWheel", storedWheel); // using this instead of the server as it saves for each client
+                console.log("Wheel stored:", storedWheel);
+            }
+
             isReady = true;
 
             showWaitingMessage();
 
-            console.log(`Button clicked: ${button.textContent.trim()}`);
-
-            socket.emit("clientReady"); // signal ready first
+            socket.emit("clientReady");
 
             nextPageButtons.forEach(button => button.disabled = true);
         });
@@ -193,9 +207,21 @@ function navigateToNextPage() {
         nextPageIndex = (currentPageIndex + 1) % pageSequence.length;
         currentPageIndex = nextPageIndex;
 
-        if (nextPageButtons.length > 0) {
+        // if (pageName === "choose-wheel.html" || pageName === "pages/choose-wheel.html") {
+        //     const defaultLabelsButton = document.getElementById("default");
+        //     const alphabeticalLabelsButton = document.getElementById("alphabetical");
+        //     const randomLabelsButton = document.getElementById("random");
+
+        //     [defaultLabelsButton, alphabeticalLabelsButton, randomLabelsButton].forEach(button => {
+        //         button.addEventListener("click", () => button.textContent = "Redirecting to next page...");
+        //     });
+
+        // } else {
+        if (nextPageButtons.length > 0 && pageName !== "choose-wheel.html") {
             nextPageButtons.forEach(button => button.textContent = "Redirecting to next page...");
         }
+        // }
+
         console.log(`Next page prepared: ${pageSequence[currentPageIndex]}`);
 
         setTimeout(() => {
@@ -210,10 +236,9 @@ function navigateToNextPage() {
     });
 }
 
-
 initialiseClientType();
 const adminRedirected = redirectAdmin();
-if (!adminRedirected) { // only setting up the page IF the given client is NOT an admin
+if (!adminRedirected) { 
     initialiseSocket();
     setupPage();
 }
