@@ -154,11 +154,6 @@ function handleCircleClick(event, socket) {
     if (midiButton) {
         midiButton.disabled = false;
     }
-
-    // nextPageButtons.forEach(button => { // for simplicity's sake, even though there is only one button
-    //     button.disabled = false;
-    //     button.textContent = "Next";
-    // });
 }
 
 function getClickCoordinates(event) {
@@ -175,6 +170,24 @@ function getClickCoordinates(event) {
     return { clickX, clickY, normalisedX, normalisedY };
 }
 
+function flashEmotionWheel(topProximities) {
+    console.log("Animation triggered!");
+    mainCircle.classList.remove("flash");
+    void mainCircle.offsetWidth; 
+    mainCircle.classList.add("flash");
+
+    const emotionLabels = document.querySelectorAll(".emotion-label");
+
+    topProximities.slice(0, 2).forEach(({ index }) => {
+        const label = emotionLabels[index - 1];
+        if (label) {
+            label.classList.remove("flash");
+            void label.offsetWidth; 
+            label.classList.add("flash");
+        }
+    });
+}
+
 function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
     socket.emit("sendMIDIData", {
         arousalScore: floatToMIDI(normalisedY.toFixed(2)),
@@ -188,17 +201,13 @@ function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
             proximity: topProximities[1].proximity
         }
     });
-
-    console.log("Animation triggered!");
-    mainCircle.classList.remove("flash");
-    void mainCircle.offsetWidth; // resetting the animation
-    mainCircle.classList.add("flash");
 }
 
 export function enableMIDIEmission(socket) {
     if (lastSelection) {
         const { normalisedX, normalisedY, topProximities } = lastSelection;
         emitMIDIData(socket, normalisedX, normalisedY, topProximities);
+        flashEmotionWheel(topProximities);
     } else {
         console.log("MIDI emission is not enabled yet");
     }
