@@ -126,12 +126,6 @@ function showFeedback(topProximities) {
     return feedbackText;
 }
 
-function floatToMIDI(value) {
-    const clamped = Math.max(-scaleRange, Math.min(scaleRange, value)); // keep within range
-    const scaled = Math.round(((clamped + scaleRange) / scaleRange) * 127); // map -2..2 to 0..127
-    return scaled;
-}
-
 function handleCircleClick(event, socket) {
     if (nextButtonClicked) return;
 
@@ -184,10 +178,8 @@ function flashEmotionWheel(topProximities) {
     });
 }
 
-function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
+function emitMIDIData(socket, topProximities) {
     socket.emit("sendMIDIData", {
-        arousalScore: floatToMIDI(normalisedY.toFixed(2)),
-        perspectiveScore: floatToMIDI(normalisedX.toFixed(2)),
         label1: {
             index: getOriginalLabelIndex(topProximities[0].index, currentLabels),
             proximity: topProximities[0].proximity
@@ -202,8 +194,9 @@ function emitMIDIData(socket, normalisedX, normalisedY, topProximities) {
 export function enableMIDIEmission(socket) {
     if (lastSelection) {
         const { normalisedX, normalisedY, topProximities } = lastSelection;
-        emitMIDIData(socket, normalisedX, normalisedY, topProximities);
+        emitMIDIData(socket, topProximities);
         flashEmotionWheel(topProximities);
+        console.log(`MIDI data emission values: ${normalisedX}, ${normalisedY}, ${topProximities}`);
     } else {
         console.log("MIDI emission is not enabled yet");
     }

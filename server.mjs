@@ -108,8 +108,6 @@ function setupMIDIProcessing(io) {
 
     io.on("connection", (socket) => { // listening for midi data
         socket.on("sendMIDIData", (data) => {
-            MIDIOutput.send("cc", { controller: 10, value: data.perspectiveScore, channel: 10 }); 
-            MIDIOutput.send("cc", { controller: 10, value: data.arousalScore, channel: 11 });
             MIDIOutput.send("cc", { controller: 1, value: data.label1.proximity, channel: data.label1.index - 1 });
             MIDIOutput.send("cc", { controller: 2, value: data.label2.proximity, channel: data.label2.index - 1 });
 
