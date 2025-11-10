@@ -15,22 +15,15 @@ const scaleRange = 2;
 const instructionMessageFadeoutTime = 500;
 const dotFadeOutTime = 400;
 
-// ! TO ADD: Two sets of labels
-/* 
-1. The standard sets with indexes
-2. Mixed set - the index here is found by 
-*/
-// ! there should be a list called usedLabels that takes the values of another
-
 const labels = [
-    "Anger",
-    "Conflict",
-    "Dislike",
-    "Guilt",
+    "Tension",
+    "Curiosity",
+    "Calm",
+    "Wonder",
     "Sadness",
-    "Loneliness",
     "Fear",
-    "Shame",
+    "Anger",
+    "Guilt",
 ];
 
 const circleCentre = "50%";
@@ -38,7 +31,7 @@ const evenLabelY = "8%";
 const evenLabelX = "40%";
 const sideLabelX = "55%";
 const middleLabelX = "50%";
-const middleLabelY = "-8%";
+const middleLabelY = "-10%";
 
 const labelPositions = [
     { top: middleLabelY, left: middleLabelX, transform: "translateX(-50%)" },
@@ -140,16 +133,7 @@ function floatToMIDI(value) {
 }
 
 function handleCircleClick(event, socket) {
-    if (nextButtonClicked) {
-        return;
-    } else {
-        if (instructionLabel) {
-            instructionLabel.style.opacity = "0";
-            setTimeout(() => {
-                instructionLabel.style.display = "none";
-            }, instructionMessageFadeoutTime);
-        }
-    }
+    if (nextButtonClicked) return;
 
     const { clickX, clickY, normalisedX, normalisedY } = getClickCoordinates(event);
     const coordsText = `Perspective score: ${normalisedX.toFixed(2)}, Arousal score: ${normalisedY.toFixed(2)}`;
@@ -232,7 +216,7 @@ export function interactWithEmotionWheel(socket) { // this is the export
 document.addEventListener("DOMContentLoaded", () => {
     drawLabels();
     applyEmotionColours(currentLabels);
-    console.log(currentLabels);
+    midiButton.disabled = true;
 
     midiButton.addEventListener("click", () => {
         midiButton.disabled = true;
@@ -240,6 +224,11 @@ document.addEventListener("DOMContentLoaded", () => {
             button.disabled = false;
             button.textContent = "Next";
         });
+
+        instructionLabel.style.opacity = "0";
+        setTimeout(() => {
+            instructionLabel.style.display = "none";
+        }, instructionMessageFadeoutTime);
 
         const previousDot = mainCircle.querySelector(".user-selection");
         if (previousDot) {

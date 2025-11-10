@@ -72,10 +72,10 @@ function setupPage() {
 
     let primaryColour = "#121238";
 
-    if (storedWheel === "alphabetical") {
-        primaryColour = "#38121d";
+    if (storedWheel === "highContrast") {
+        primaryColour = "#202020ff";
     } else if (storedWheel === "random") {
-        primaryColour = "#2d1238";
+        primaryColour = "#210d44ff";
     }
 
     document.documentElement.style.setProperty("--primary-colour", primaryColour);
@@ -209,10 +209,10 @@ function navigateToNextPage() {
 
         // if (pageName === "choose-wheel.html" || pageName === "pages/choose-wheel.html") {
         //     const defaultLabelsButton = document.getElementById("default");
-        //     const alphabeticalLabelsButton = document.getElementById("alphabetical");
+        //     const highContrastLabelsButton = document.getElementById("highContrast");
         //     const randomLabelsButton = document.getElementById("random");
 
-        //     [defaultLabelsButton, alphabeticalLabelsButton, randomLabelsButton].forEach(button => {
+        //     [defaultLabelsButton, highContrastLabelsButton, randomLabelsButton].forEach(button => {
         //         button.addEventListener("click", () => button.textContent = "Redirecting to next page...");
         //     });
 

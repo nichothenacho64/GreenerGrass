@@ -10,9 +10,9 @@ body {
     overflow: hidden;
     overscroll-behavior: none;
     font-family: "Merriweather", 'Times New Roman', Times, serif;
-    color: white;
+    color: white; 
     background-color: $primary-colour;
-    font-size: 1.75em; // previously 1.6em
+    font-size: 1.65em; // previously 1.6em
     transition: background-color 1s ease-in-out;
 }
 

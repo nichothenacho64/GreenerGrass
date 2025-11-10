@@ -9,7 +9,7 @@ $corner-margin-large: 4.5rem;
 
 // for emotion-wheel.html
 
-$sdf: 60%;
+$sdf: 65%;
 $ldf: 55%;
 
 $smtp1: 6%;
@@ -19,13 +19,14 @@ $lmtp1: 12%;
 $lmtp2: $lmtp1 * 2;
 
 :root { // for purposes of modification, it has to be written with CSS like syntax :(
-    --emotion-1: hsl(270, #{$sdf + $smtp2}, #{$ldf});
-    --emotion-2: hsl(250, #{$sdf + $smtp1}, #{$ldf + $lmtp1});
-    --emotion-3: hsl(230, #{$sdf}, #{$ldf + $lmtp2});
-    --emotion-4: hsl(210, #{$sdf - $smtp1}, #{$ldf + $lmtp1});
-    --emotion-5: hsl(190, #{$sdf - $smtp2}, #{$ldf});
-    --emotion-6: hsl(170, #{$sdf - $smtp1}, #{$ldf - $lmtp1});
-    --emotion-7: hsl(150, #{$sdf}, #{$ldf - $lmtp2});
+    --emotion-1: hsl(80, #{$sdf + $smtp2}, #{$ldf});
+    --emotion-2: hsl(125, #{$sdf + $smtp1}, #{$ldf + $lmtp1});
+    --emotion-3: hsl(170, #{$sdf}, #{$ldf + $lmtp2});
+    --emotion-4: hsl(215, #{$sdf - $smtp1}, #{$ldf + $lmtp1});
+    --emotion-5: hsl(260, #{$sdf - $smtp2}, #{$ldf});
+    --emotion-6: hsl(305, #{$sdf - $smtp1}, #{$ldf - $lmtp1});
+    --emotion-7: hsl(350, #{$sdf}, #{$ldf - $lmtp2});
+    --emotion-8: hsl(35, #{$sdf + $smtp1}, #{$ldf - $lmtp2});
 }
 
 $circle-gradient: conic-gradient(
@@ -41,5 +42,5 @@ $circle-gradient: conic-gradient(
 );
 
 $octagon-size: 50vmin;
-$circle-size: calc(#{$octagon-size} * 0.85);
+$circle-size: $octagon-size * 0.85;
 $dot-size: 20px;

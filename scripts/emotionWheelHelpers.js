@@ -1,12 +1,32 @@
-const emotionColours = [ // this will do for now
-    "hsl(270, 60%, 55%)",
-    "hsl(250, 66%, 66%)",
-    "hsl(230, 60%, 67%)",
-    "hsl(210, 54%, 66%)",
-    "hsl(190, 48%, 55%)",
-    "hsl(170, 54%, 44%)",
-    "hsl(150, 60%, 33%)",
-    "hsl(130, 66%, 33%)",
+const sdf = 65; // for the sake of consistency with SCSS, these constants have the same names as their SCSS conterparts
+const ldf = 55;
+
+const smtp1 = 6;
+const smtp2 = smtp1 * 2;
+
+const lmtp1 = 12;
+const lmtp2 = lmtp1 * 2;
+
+const emotionColours = [
+    `hsl(80, ${sdf + smtp2}%, ${ldf}%)`,
+    `hsl(125, ${sdf + smtp1}%, ${ldf + lmtp1}%)`,
+    `hsl(170, ${sdf}%, ${ldf + lmtp2}%)`,
+    `hsl(215, ${sdf - smtp1}%, ${ldf + lmtp1}%)`,
+    `hsl(260, ${sdf - smtp2}%, ${ldf}%)`,
+    `hsl(305, ${sdf - smtp1}%, ${ldf - lmtp1}%)`,
+    `hsl(350, ${sdf}%, ${ldf - lmtp2}%)`,
+    `hsl(35, ${sdf + smtp1}%, ${ldf - lmtp2}%)`
+];
+
+const highContrastLabels = [
+    "Tension",
+    "Sadness",
+    "Curiosity",
+    "Calm",
+    "Anger",
+    "Fear",
+    "Wonder",
+    "Guilt"
 ];
 
 export function applyEmotionColours(currentLabels) {
@@ -34,10 +54,11 @@ export function getWheelChoice(labels) {
 
     const storedWheel = sessionStorage.getItem("chosenWheel") || "default";
 
-    if (storedWheel === "alphabetical") {
-        currentLabels = [...labels]
-            .sort()
-            .map(text => ({ text, index: labels.indexOf(text) + 1 }));
+    if (storedWheel === "highContrast") {
+        currentLabels = highContrastLabels.map(text => ({
+            text,
+            index: labels.indexOf(text) + 1
+        }));
     } else if (storedWheel === "random") {
         currentLabels = getRandomisedLabels(labels);
     } else {
