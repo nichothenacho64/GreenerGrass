@@ -130,7 +130,7 @@ function handleCircleClick(event, socket) {
     if (nextButtonClicked) return;
 
     const { clickX, clickY, normalisedX, normalisedY } = getClickCoordinates(event);
-    const coordsText = `Perspective score: ${normalisedX.toFixed(2)}, Arousal score: ${normalisedY.toFixed(2)}`;
+    const coordsText = `Valence score: ${normalisedX.toFixed(2)}, Arousal score: ${normalisedY.toFixed(2)}`;
 
     showUserSelection(clickX, clickY);
 
